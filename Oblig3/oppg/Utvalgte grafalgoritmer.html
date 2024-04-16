@@ -1,0 +1,1692 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!-- saved from url=(0047)https://larstvei.github.io/grafalgoritmer/#fn.1 -->
+<html xmlns="http://www.w3.org/1999/xhtml" lang="nb" xml:lang="nb"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<!-- 2023-09-22 Fri 18:38 -->
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Utvalgte grafalgoritmer</title>
+<meta name="author" content="Lars Tveito">
+<meta name="generator" content="Org Mode">
+<script type="text/javascript" src="./Utvalgte grafalgoritmer_files/script.js.download"></script>
+<link rel="stylesheet" href="./Utvalgte grafalgoritmer_files/katex.min.css" integrity="sha384-zTROYFVGOfTw7JV7KUu8udsvW2fx4lWOsCEDqhBreBwlHI4ioVRtmIvEThzJHGET" crossorigin="anonymous">
+<!-- The loading of KaTeX is deferred to speed up page rendering -->
+<script defer="" src="./Utvalgte grafalgoritmer_files/katex.min.js.download" integrity="sha384-GxNFqL3r9uRJQhR+47eDxuPoNE7yLftQM8LcxzgS4HT73tp970WS/wV5p8UzCOmb" crossorigin="anonymous"></script>
+
+<!-- To automatically render math in text elements, include the auto-render extension: -->
+<script defer="" src="./Utvalgte grafalgoritmer_files/auto-render.min.js.download" integrity="sha384-vZTG03m+2yp6N6BNi5iM4rW4oIwk5DfcNdFfxkk9ZWpDriOkXX8voJBFrAO7MpVl" crossorigin="anonymous" onload="renderMathInElement(document.body);"></script>
+<link rel="stylesheet" type="text/css" href="./Utvalgte grafalgoritmer_files/rethink.css">
+</head>
+<body>
+<div id="preamble" class="status">
+<h1 class="title">Utvalgte grafalgoritmer</h1>
+                                                  <p class="author">Lars Tveito</p>
+                                                  <p class="date">Høst 2023</p>
+</div>
+<div id="content" class="content">
+<p>
+Dette dokumentet inneholder en gjennomgang av noen sentrale grafalgoritmer, og
+hvordan de kan implementeres i Python. Det kan brukes som et løsningsforslag
+for det som alltid er en god ukesoppgave: <i>implementer algoritmene som
+gjennomgås</i>.
+</p>
+
+<p>
+La oss ta utgangspunkt i følgende graf.
+</p>
+
+
+<div id="orgfb6f374" class="figure">
+<p><img src="./Utvalgte grafalgoritmer_files/forelesningsgraf.svg" alt="forelesningsgraf.svg" class="org-svg" width="400">
+</p>
+</div>
+
+<p>
+Den er urettet og vektet. Den kan skrives ned ved å liste alle kantene sammen
+med vektene.
+</p>
+
+<pre class="example" id="org753169d">A B 13
+A C 6
+B C 7
+B D 1
+C D 14
+C E 8
+C H 20
+D E 9
+D F 3
+E F 2
+E J 18
+G H 15
+G I 5
+G J 19
+G K 10
+H J 17
+I K 11
+J K 16
+J L 4
+K L 12
+</pre>
+
+<p>
+Merk at denne måten å skrive ned grafen fungerer fordi alle noder har minst én
+kant i eksempelgrafen. Dersom vi hadde hatt noder som ikke hadde noen naboer
+måtte vi ha listet alle nodene også.
+</p>
+
+<div id="outline-container-org1a9d670" class="outline-2">
+<h2 id="org1a9d670">Bygg grafen</h2>
+<div class="outline-text-2" id="text-org1a9d670">
+<p>
+Vi kan skrive en prosedyre som leser linjene og returnerer en graf <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>G</mi><mo>=</mo><mo stretchy="false">(</mo><mi>V</mi><mo separator="true">,</mo><mi>E</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">G = (V,
+  E)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal">G</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right: 0.22222em;">V</span><span class="mpunct">,</span><span class="mspace" style="margin-right: 0.166667em;"></span><span class="mord mathnormal" style="margin-right: 0.05764em;">E</span><span class="mclose">)</span></span></span></span></span>, der <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>w</mi></mrow><annotation encoding="application/x-tex">w</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.02691em;">w</span></span></span></span></span> er en vektfunksjon fra <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>V</mi><mo>×</mo><mi>V</mi><mo>→</mo><mi mathvariant="double-struck">N</mi></mrow><annotation encoding="application/x-tex">V \times V \to \mathbb{N}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.76666em; vertical-align: -0.08333em;"></span><span class="mord mathnormal" style="margin-right: 0.22222em;">V</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.22222em;">V</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">→</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 0.68889em; vertical-align: 0em;"></span><span class="mord mathbb">N</span></span></span></span></span>.
+</p>
+
+<blockquote>
+<p>
+Kodeblokkene er skjult, men vises når du trykker på dem; det er ment som en
+oppfordring til å prøve å løse problemet selv først!
+</p>
+
+Trykk <a style="cursor: pointer;" onclick="unblurAll()">her</a> dersom du vil
+vise alle kodeblokkene.
+</blockquote>
+
+<div class="org-src-container">
+<pre class="src src-python blur" style="cursor: pointer;"><button class="copy-code-button" type="button"><span class="copy-hoverbox">Copied!</span></button><span style="color: #673AB7;">from</span> collections <span style="color: #673AB7;">import</span> defaultdict
+
+<span style="color: #673AB7;">def</span> <span style="color: #263238; font-weight: bold;">buildgraph</span>(lines):
+    <span style="color: #263238; font-weight: bold;">V</span> = <span style="color: #673AB7;">set</span>()
+    <span style="color: #263238; font-weight: bold;">E</span> = defaultdict(<span style="color: #673AB7;">set</span>)
+    <span style="color: #263238; font-weight: bold;">w</span> = <span style="color: #673AB7;">dict</span>()
+
+    <span style="color: #673AB7;">for</span> line <span style="color: #673AB7;">in</span> lines.splitlines():
+        <span style="color: #263238; font-weight: bold;">u</span>, <span style="color: #263238; font-weight: bold;">v</span>, <span style="color: #263238; font-weight: bold;">weight</span> = line.strip().split()
+
+        V.add(u)
+        V.add(v)
+
+        E[u].add(v)
+        E[v].add(u)
+
+        <span style="color: #263238; font-weight: bold;">w</span>[(u, v)] = <span style="color: #673AB7;">int</span>(weight)
+        <span style="color: #263238; font-weight: bold;">w</span>[(v, u)] = <span style="color: #673AB7;">int</span>(weight)
+
+    <span style="color: #673AB7;">return</span> V, E, w
+</pre>
+</div>
+
+<p>
+Vi antar at linjene er gitt som en enkel streng. Siden grafen er <i>urettet</i>
+representerer vi hver kant i begge retninger. For kantene <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>E</mi></mrow><annotation encoding="application/x-tex">E</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.05764em;">E</span></span></span></span></span> bruker vi en
+<code>defaultdict</code> slik at alle noder vi implisitt er assosiert med en tom mengde;
+med en vanlig <code>dict</code> kunne vi for eksempel initialisert en tom mengde for
+alle nodene først. Nå kan vi lese inn grafen, og antar at grafen er gitt i en
+variabel <code>lines</code>.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python blur" style="cursor: pointer;"><button class="copy-code-button" type="button"><span class="copy-hoverbox">Copied!</span></button><span style="color: #263238; font-weight: bold;">G</span> = buildgraph(lines)
+</pre>
+</div>
+</div>
+
+<div id="outline-container-orgc642242" class="outline-3">
+<h3 id="orgc642242">Tegn grafen</h3>
+<div class="outline-text-3" id="text-orgc642242">
+<p>
+Nå som vi har en måte å bygge grafen, kan det være kjekt å ha en måte å vise
+grafen. Den enkleste måten jeg vet om er å bruke <a href="https://pypi.org/project/graphviz/">Python sitt bibliotek</a> for
+<a href="https://www.graphviz.org/">Graphviz</a>. Dette er ikke viktig stoff for IN2010, men verktøy som dette gjør
+det enklere å oppdage feil i egen kode.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python blur" style="cursor: pointer;"><button class="copy-code-button" type="button"><span class="copy-hoverbox">Copied!</span></button><span style="color: #673AB7;">import</span> graphviz
+
+<span style="color: #673AB7;">def</span> <span style="color: #263238; font-weight: bold;">drawgraph</span>(G):
+    <span style="color: #263238; font-weight: bold;">V</span>, <span style="color: #263238; font-weight: bold;">E</span>, <span style="color: #263238; font-weight: bold;">w</span> = G
+    <span style="color: #263238; font-weight: bold;">dot</span> = graphviz.Graph()
+    <span style="color: #263238; font-weight: bold;">seen_edges</span> = <span style="color: #673AB7;">set</span>()
+
+    <span style="color: #673AB7;">for</span> u <span style="color: #673AB7;">in</span> V:
+        dot.node(u)
+
+        <span style="color: #673AB7;">for</span> v <span style="color: #673AB7;">in</span> E[u]:
+            <span style="color: #673AB7;">if</span> (v, u) <span style="color: #673AB7;">in</span> seen_edges:
+                <span style="color: #673AB7;">continue</span>
+            seen_edges.add((u, v))
+            dot.edge(u, v, label=<span style="color: #673AB7;">str</span>(w[(u, v)]))
+
+    dot.render(<span style="color: #90A4AE;">'graph'</span>, <span style="color: #673AB7;">format</span>=<span style="color: #90A4AE;">'svg'</span>)
+
+drawgraph(G)
+</pre>
+</div>
+
+
+<div id="org9056fe3" class="figure">
+<p><img src="./Utvalgte grafalgoritmer_files/graph.svg" alt="graph.svg" class="org-svg">
+</p>
+</div>
+
+<p>
+Merk at den grafen vi ser her er den samme grafen som den på toppen av siden
+(men den er ikke tegnet like pent).
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org6002ca1" class="outline-2">
+<h2 id="org6002ca1">Traverser grafen</h2>
+<div class="outline-text-2" id="text-org6002ca1">
+<p>
+Nå som vi har representert grafen, så kan vi traversere den. Det vil si at vi
+systematisk går gjennom alle nodene i grafen.
+</p>
+
+<p>
+Grafen vi jobber med er <i>sammenhengende</i>. Det betyr at det finnes en sti
+mellom alle par av noder i <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>V</mi></mrow><annotation encoding="application/x-tex">V</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.22222em;">V</span></span></span></span></span>. Når en graf er sammenhengende, så er det
+tilstrekkelig å starte med en vilkårlig node <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>u</mi><mo>∈</mo><mi>V</mi></mrow><annotation encoding="application/x-tex">u \in V</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.5782em; vertical-align: -0.0391em;"></span><span class="mord mathnormal">u</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">∈</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.22222em;">V</span></span></span></span></span>, og besøke <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>u</mi></mrow><annotation encoding="application/x-tex">u</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal">u</span></span></span></span></span> sine
+naboer, og deres naboer sine naboer, og så videre, og da vil vi til slutt ha
+besøkt alle noder i <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>V</mi></mrow><annotation encoding="application/x-tex">V</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.22222em;">V</span></span></span></span></span>.
+</p>
+
+<p>
+Det finnes to svært naturlige måter å utføre en slik traversering. Begge går
+ut på å starte i en node, notere ned nodens naboer, besøke dem, notere ned
+deres naboer også, og fortsette slik. I tillegg må vi holde styr på hvilke
+noder som er besøkt, slik at vi ikke besøker noder flere ganger, og dermed
+risikere at traverseringen aldri terminerer. Distinksjonen mellom de to
+naturlige måtene å traversere grafen på er i <i>valg av datastruktur</i> når vi skal
+notere ned hvilke noder som er i «besøkslista». De enkleste (og dermed mest
+naturlige) er enten å:
+</p>
+<ul class="org-ul">
+<li>gå så dypt som mulig inn i grafen som mulig, det vil si at du følger
+(ikke-besøkte) naboer så langt du kan;</li>
+<li>besøke alle direkte naboer før du besøker naboer sine naboer.</li>
+</ul>
+<p>
+Den første strategien kalles <i>dybde-først søk</i> (DFS) (eng: <i>depth-first search</i>),
+og den andre kalles <i>bredde først søk</i> (BFS) (eng: <i>breath-first search</i>). Det
+mest vesentlige skillet mellom de to strategiene at et dybde-først søk
+anvender en <i>stack</i> og et bredde-først søk anvender en <i>kø</i>.
+</p>
+</div>
+
+<div id="outline-container-orgfb35b36" class="outline-3">
+<h3 id="orgfb35b36">Dybde-først søk</h3>
+<div class="outline-text-3" id="text-orgfb35b36">
+<p>
+DFS fra en gitt node <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi></mrow><annotation encoding="application/x-tex">s</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal">s</span></span></span></span></span> kan implementeres rekursivt på følgende måte:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python blur" style="cursor: pointer;"><button class="copy-code-button" type="button"><span class="copy-hoverbox">Copied!</span></button><span style="color: #673AB7;">def</span> <span style="color: #263238; font-weight: bold;">dfs_rec</span>(G, s, visited, result):
+    <span style="color: #263238; font-weight: bold;">_</span>, <span style="color: #263238; font-weight: bold;">E</span>, <span style="color: #263238; font-weight: bold;">_</span> = G
+    result.append(s)
+    visited.add(s)
+    <span style="color: #673AB7;">for</span> v <span style="color: #673AB7;">in</span> E[s]:
+        <span style="color: #673AB7;">if</span> v <span style="color: #673AB7;">not</span> <span style="color: #673AB7;">in</span> visited:
+            dfs_rec(G, v, visited, result)
+    <span style="color: #673AB7;">return</span> result
+</pre>
+</div>
+
+<p>
+Merk at vi her gir med to ekstra argumenter; et for å holde styr på hvilke
+noder som er besøkt; og et for å lagre rekkefølgen nodene blir besøkt i. Nå
+kan vi for eksempel kalle på <code>dfs_rec</code> fra noden <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi></mrow><annotation encoding="application/x-tex">A</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal">A</span></span></span></span></span>:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python blur" style="cursor: pointer;"><button class="copy-code-button" type="button"><span class="copy-hoverbox">Copied!</span></button>dfs_rec(G, <span style="color: #90A4AE;">'A'</span>, <span style="color: #673AB7;">set</span>(), [])
+</pre>
+</div>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col class="org-left">
+
+<col class="org-left">
+
+<col class="org-left">
+
+<col class="org-left">
+
+<col class="org-left">
+
+<col class="org-left">
+
+<col class="org-left">
+
+<col class="org-left">
+
+<col class="org-left">
+
+<col class="org-left">
+
+<col class="org-left">
+
+<col class="org-left">
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">A</td>
+<td class="org-left">C</td>
+<td class="org-left">E</td>
+<td class="org-left">J</td>
+<td class="org-left">G</td>
+<td class="org-left">H</td>
+<td class="org-left">K</td>
+<td class="org-left">L</td>
+<td class="org-left">I</td>
+<td class="org-left">D</td>
+<td class="org-left">B</td>
+<td class="org-left">F</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+Vi kan også gjøre et DFS-søk ved å bruke en eksplisitt stack. Merk at
+rekursive kall legges på det som kalles en «<a href="https://www.wikiwand.com/en/Call_stack">call stack</a>»; altså bytter vi
+egentlig ut en stack med en annen!
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python blur" style="cursor: pointer;"><button class="copy-code-button" type="button"><span class="copy-hoverbox">Copied!</span></button><span style="color: #673AB7;">def</span> <span style="color: #263238; font-weight: bold;">dfs</span>(G, s):
+    <span style="color: #263238; font-weight: bold;">_</span>, <span style="color: #263238; font-weight: bold;">E</span>, <span style="color: #263238; font-weight: bold;">_</span> = G
+    <span style="color: #263238; font-weight: bold;">visited</span> = <span style="color: #673AB7;">set</span>()
+    <span style="color: #263238; font-weight: bold;">stack</span> = [s]
+    <span style="color: #263238; font-weight: bold;">result</span> = []
+
+    <span style="color: #673AB7;">while</span> stack:
+        <span style="color: #263238; font-weight: bold;">u</span> = stack.pop()
+        <span style="color: #673AB7;">if</span> u <span style="color: #673AB7;">not</span> <span style="color: #673AB7;">in</span> visited:
+            result.append(u)
+            visited.add(u)
+            <span style="color: #673AB7;">for</span> v <span style="color: #673AB7;">in</span> E[u]:
+                stack.append(v)
+    <span style="color: #673AB7;">return</span> result
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-python blur" style="cursor: pointer;"><button class="copy-code-button" type="button"><span class="copy-hoverbox">Copied!</span></button>dfs(G, <span style="color: #90A4AE;">'A'</span>)
+</pre>
+</div>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col class="org-left">
+
+<col class="org-left">
+
+<col class="org-left">
+
+<col class="org-left">
+
+<col class="org-left">
+
+<col class="org-left">
+
+<col class="org-left">
+
+<col class="org-left">
+
+<col class="org-left">
+
+<col class="org-left">
+
+<col class="org-left">
+
+<col class="org-left">
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">A</td>
+<td class="org-left">B</td>
+<td class="org-left">D</td>
+<td class="org-left">F</td>
+<td class="org-left">E</td>
+<td class="org-left">C</td>
+<td class="org-left">H</td>
+<td class="org-left">J</td>
+<td class="org-left">K</td>
+<td class="org-left">I</td>
+<td class="org-left">G</td>
+<td class="org-left">L</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<div id="outline-container-org2d70228" class="outline-3">
+<h3 id="org2d70228">Bredde-først søk</h3>
+<div class="outline-text-3" id="text-org2d70228">
+<p>
+Ved å bruke en kø (altså en liste med «first-in-first-out» snarere enn en
+«last-in-first-out»), i stedet for en stack, så får vi et bredde-først søk.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python blur" style="cursor: pointer;"><button class="copy-code-button" type="button"><span class="copy-hoverbox">Copied!</span></button><span style="color: #673AB7;">from</span> collections <span style="color: #673AB7;">import</span> deque
+
+<span style="color: #673AB7;">def</span> <span style="color: #263238; font-weight: bold;">bfs</span>(G, s):
+    <span style="color: #263238; font-weight: bold;">_</span>, <span style="color: #263238; font-weight: bold;">E</span>, <span style="color: #263238; font-weight: bold;">_</span> = G
+    <span style="color: #263238; font-weight: bold;">visited</span> = <span style="color: #673AB7;">set</span>([s])
+    <span style="color: #263238; font-weight: bold;">queue</span> = deque([s])
+    <span style="color: #263238; font-weight: bold;">result</span> = []
+
+    <span style="color: #673AB7;">while</span> queue:
+        <span style="color: #263238; font-weight: bold;">u</span> = queue.popleft()
+        result.append(u)
+        <span style="color: #673AB7;">for</span> v <span style="color: #673AB7;">in</span> E[u]:
+            <span style="color: #673AB7;">if</span> v <span style="color: #673AB7;">not</span> <span style="color: #673AB7;">in</span> visited:
+                visited.add(v)
+                queue.append(v)
+    <span style="color: #673AB7;">return</span> result
+</pre>
+</div>
+
+<p>
+Her bruker vi en <code>deque</code>, som gir konstant tid for innsetting og sletting på
+hver ende av køen. Vi setter inn på slutten, og tar ut elementene i
+begynnelsen. Merk at vi kunne like gjerne gjort motsatt, og satt inn på
+begynnelsen og tatt ut på slutten.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python blur" style="cursor: pointer;"><button class="copy-code-button" type="button"><span class="copy-hoverbox">Copied!</span></button>bfs(G, <span style="color: #90A4AE;">'A'</span>)
+</pre>
+</div>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col class="org-left">
+
+<col class="org-left">
+
+<col class="org-left">
+
+<col class="org-left">
+
+<col class="org-left">
+
+<col class="org-left">
+
+<col class="org-left">
+
+<col class="org-left">
+
+<col class="org-left">
+
+<col class="org-left">
+
+<col class="org-left">
+
+<col class="org-left">
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">A</td>
+<td class="org-left">C</td>
+<td class="org-left">B</td>
+<td class="org-left">E</td>
+<td class="org-left">D</td>
+<td class="org-left">H</td>
+<td class="org-left">J</td>
+<td class="org-left">F</td>
+<td class="org-left">G</td>
+<td class="org-left">L</td>
+<td class="org-left">K</td>
+<td class="org-left">I</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org447a7aa" class="outline-2">
+<h2 id="org447a7aa">Korteste stier</h2>
+<div class="outline-text-2" id="text-org447a7aa">
+<p>
+Når vi snakker om <i>korteste stier</i> er det som ofte snakk om vektede grafer.
+Men la oss for et øyeblikk tenke på hva det betyr for uvektede grafer. I
+eksempelgrafen ovenfor kan vi ganske enkelt ignorere vektene, og anse grafen
+å være uvektet. Den korteste stien mellom to noder i en uvektet graf, er
+stien som går mellom de to nodene med færrest kanter. Da får vi faktisk den
+korteste stien mellom to noder ved hjelp av et bredde-først søk, slik vi
+gjorde ovenfor.
+</p>
+</div>
+
+<div id="outline-container-org2922127" class="outline-3">
+<h3 id="org2922127">Bredde-først søk (igjen)</h3>
+<div class="outline-text-3" id="text-org2922127">
+<p>
+Det som mangler fra det forrige bredde-først søket er en måte å hente ut de
+korteste stiene; det eneste vi «sparer på» under søket er rekkefølgen noder
+blir besøkt i. En enkel måte å lagre stiene, er for hver node vi legger på
+køen, også lagre hvilken node som la den på køen. Det kan gjøres slik:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python blur" style="cursor: pointer;"><button class="copy-code-button" type="button"><span class="copy-hoverbox">Copied!</span></button><span style="color: #673AB7;">def</span> <span style="color: #263238; font-weight: bold;">bfs_shortest_paths_from</span>(G, s):
+    <span style="color: #263238; font-weight: bold;">_</span>, <span style="color: #263238; font-weight: bold;">E</span>, <span style="color: #263238; font-weight: bold;">_</span> = G
+    <span style="color: #263238; font-weight: bold;">parents</span> = {s : <span style="color: #673AB7;">None</span>}
+    <span style="color: #263238; font-weight: bold;">queue</span> = deque([s])
+
+    <span style="color: #673AB7;">while</span> queue:
+        <span style="color: #263238; font-weight: bold;">u</span> = queue.popleft()
+        <span style="color: #673AB7;">for</span> v <span style="color: #673AB7;">in</span> E[u]:
+            <span style="color: #673AB7;">if</span> v <span style="color: #673AB7;">not</span> <span style="color: #673AB7;">in</span> parents:
+                <span style="color: #263238; font-weight: bold;">parents</span>[v] = u
+                queue.append(v)
+    <span style="color: #673AB7;">return</span> parents
+</pre>
+</div>
+
+<p>
+Her har vi kun byttet ut <code>visited</code> med <code>parents</code>, der <code>parents</code> er en ordbok som
+assosierer hver node <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>u</mi></mrow><annotation encoding="application/x-tex">u</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal">u</span></span></span></span></span> til noden <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>v</mi></mrow><annotation encoding="application/x-tex">v</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.03588em;">v</span></span></span></span></span> som la <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>u</mi></mrow><annotation encoding="application/x-tex">u</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal">u</span></span></span></span></span> på køen. Vi kan avgjøre om
+en node er besøkt før ved å sjekke om noden har en forelder.
+</p>
+
+<p>
+Merk at denne mappingen av nodene utgjør et tre! Vi kan utforske den nærmere
+ved å tegne treet (igjen med bruk av graphviz).
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python blur" style="cursor: pointer;"><button class="copy-code-button" type="button"><span class="copy-hoverbox">Copied!</span></button><span style="color: #673AB7;">def</span> <span style="color: #263238; font-weight: bold;">draw_parents</span>(parents):
+    <span style="color: #263238; font-weight: bold;">dot</span> = graphviz.Graph()
+    <span style="color: #673AB7;">for</span> u <span style="color: #673AB7;">in</span> parents:
+        <span style="color: #263238; font-weight: bold;">v</span> = parents[u]
+        <span style="color: #673AB7;">if</span> v: dot.edge(v, u)
+    dot.render(<span style="color: #90A4AE;">'bfs_spanningtree'</span>, <span style="color: #673AB7;">format</span>=<span style="color: #90A4AE;">'svg'</span>)
+
+draw_parents(bfs_shortest_paths_from(G, <span style="color: #90A4AE;">'A'</span>))
+</pre>
+</div>
+
+
+<div id="orgc4e5c3c" class="figure">
+<p><img src="./Utvalgte grafalgoritmer_files/bfs_spanningtree.svg" alt="bfs_spanningtree.svg" class="org-svg">
+</p>
+</div>
+
+<p>
+Fra dette treet kan man lese ut den korteste stien fra <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi></mrow><annotation encoding="application/x-tex">A</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal">A</span></span></span></span></span> til alle andre
+noder. For å finne den korteste stien mellom to noder <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi></mrow><annotation encoding="application/x-tex">s</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal">s</span></span></span></span></span> og <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>t</mi></mrow><annotation encoding="application/x-tex">t</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.61508em; vertical-align: 0em;"></span><span class="mord mathnormal">t</span></span></span></span></span> er det
+tilstrekkelig å kalle på <code>bfs_shortest_paths_from(G, s)</code>, og følge <code>parents</code> fra
+<span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>t</mi></mrow><annotation encoding="application/x-tex">t</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.61508em; vertical-align: 0em;"></span><span class="mord mathnormal">t</span></span></span></span></span> til roten av treet som er <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi></mrow><annotation encoding="application/x-tex">s</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal">s</span></span></span></span></span>. Et slikt tre, som inneholder de samme
+nodene som en graf <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>G</mi></mrow><annotation encoding="application/x-tex">G</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal">G</span></span></span></span></span> kalles et spenntre for <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>G</mi></mrow><annotation encoding="application/x-tex">G</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal">G</span></span></span></span></span>. Merk at dersom grafen
+ikke er sammenhengende, så vil det ikke nødvendigvis finnes en sti fra <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi></mrow><annotation encoding="application/x-tex">s</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal">s</span></span></span></span></span>
+til <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>t</mi></mrow><annotation encoding="application/x-tex">t</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.61508em; vertical-align: 0em;"></span><span class="mord mathnormal">t</span></span></span></span></span>, hvor vi her for enkelhets skyld returnerer en tom liste.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python blur" style="cursor: pointer;"><button class="copy-code-button" type="button"><span class="copy-hoverbox">Copied!</span></button><span style="color: #673AB7;">def</span> <span style="color: #263238; font-weight: bold;">bfs_shortest_path_between</span>(G, s, t):
+    <span style="color: #263238; font-weight: bold;">parents</span> = bfs_shortest_paths_from(G, s)
+    <span style="color: #263238; font-weight: bold;">v</span> = t
+    <span style="color: #263238; font-weight: bold;">path</span> = []
+
+    <span style="color: #673AB7;">if</span> t <span style="color: #673AB7;">not</span> <span style="color: #673AB7;">in</span> parents:
+        <span style="color: #673AB7;">return</span> path
+
+    <span style="color: #673AB7;">while</span> v:
+        path.append(v)
+        <span style="color: #263238; font-weight: bold;">v</span> = parents[v]
+
+    <span style="color: #673AB7;">return</span> path[::-1]
+</pre>
+</div>
+
+<p>
+Merk at <code>path[::-1]</code> er en måte å reversere en liste i Python. Med denne
+prosedyren definert kan vi finne korteste vei mellom for eksempel nodene <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi></mrow><annotation encoding="application/x-tex">A</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal">A</span></span></span></span></span>
+og <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>G</mi></mrow><annotation encoding="application/x-tex">G</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal">G</span></span></span></span></span>.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python blur" style="cursor: pointer;"><button class="copy-code-button" type="button"><span class="copy-hoverbox">Copied!</span></button>bfs_shortest_path_between(G, <span style="color: #90A4AE;">'A'</span>, <span style="color: #90A4AE;">'G'</span>)
+</pre>
+</div>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col class="org-left">
+
+<col class="org-left">
+
+<col class="org-left">
+
+<col class="org-left">
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">A</td>
+<td class="org-left">C</td>
+<td class="org-left">H</td>
+<td class="org-left">G</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+Vi kan også finne korteste veien fra en node til alle andre noder.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python blur" style="cursor: pointer;"><button class="copy-code-button" type="button"><span class="copy-hoverbox">Copied!</span></button><span style="color: #673AB7;">def</span> <span style="color: #263238; font-weight: bold;">bfs_all_shortest_paths</span>(G, s):
+    <span style="color: #263238; font-weight: bold;">V</span>, <span style="color: #263238; font-weight: bold;">_</span>, <span style="color: #263238; font-weight: bold;">_</span> = G
+    <span style="color: #263238; font-weight: bold;">parents</span> = bfs_shortest_paths_from(G, s)
+    <span style="color: #263238; font-weight: bold;">paths</span> = []
+
+    <span style="color: #673AB7;">for</span> v <span style="color: #673AB7;">in</span> V:
+        <span style="color: #263238; font-weight: bold;">path</span> = []
+        <span style="color: #673AB7;">while</span> v:
+            path.append(v)
+            <span style="color: #263238; font-weight: bold;">v</span> = parents[v]
+        paths.append(path[::-1])
+    <span style="color: #673AB7;">return</span> paths
+</pre>
+</div>
+
+<p>
+Med denne prosedyren definert kan vi finne korteste vei mellom alle par av
+noder. Vi kan kalle på prosedyren fra noden <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi></mrow><annotation encoding="application/x-tex">A</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal">A</span></span></span></span></span>, og få ut de korteste stiene
+fra <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi></mrow><annotation encoding="application/x-tex">A</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal">A</span></span></span></span></span> til alle andre noder. Merk at vi kaller på <code>sorted</code> kun for å gjøre
+tabellen litt enklere å lese.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python blur" style="cursor: pointer;"><button class="copy-code-button" type="button"><span class="copy-hoverbox">Copied!</span></button><span style="color: #673AB7;">sorted</span>(bfs_all_shortest_paths(G, <span style="color: #90A4AE;">'A'</span>))
+</pre>
+</div>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col class="org-left">
+
+<col class="org-left">
+
+<col class="org-left">
+
+<col class="org-left">
+
+<col class="org-left">
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">A</td>
+<td class="org-left">&nbsp;</td>
+<td class="org-left">&nbsp;</td>
+<td class="org-left">&nbsp;</td>
+<td class="org-left">&nbsp;</td>
+</tr>
+
+<tr>
+<td class="org-left">A</td>
+<td class="org-left">B</td>
+<td class="org-left">&nbsp;</td>
+<td class="org-left">&nbsp;</td>
+<td class="org-left">&nbsp;</td>
+</tr>
+
+<tr>
+<td class="org-left">A</td>
+<td class="org-left">C</td>
+<td class="org-left">&nbsp;</td>
+<td class="org-left">&nbsp;</td>
+<td class="org-left">&nbsp;</td>
+</tr>
+
+<tr>
+<td class="org-left">A</td>
+<td class="org-left">C</td>
+<td class="org-left">D</td>
+<td class="org-left">&nbsp;</td>
+<td class="org-left">&nbsp;</td>
+</tr>
+
+<tr>
+<td class="org-left">A</td>
+<td class="org-left">C</td>
+<td class="org-left">E</td>
+<td class="org-left">&nbsp;</td>
+<td class="org-left">&nbsp;</td>
+</tr>
+
+<tr>
+<td class="org-left">A</td>
+<td class="org-left">C</td>
+<td class="org-left">E</td>
+<td class="org-left">F</td>
+<td class="org-left">&nbsp;</td>
+</tr>
+
+<tr>
+<td class="org-left">A</td>
+<td class="org-left">C</td>
+<td class="org-left">E</td>
+<td class="org-left">J</td>
+<td class="org-left">&nbsp;</td>
+</tr>
+
+<tr>
+<td class="org-left">A</td>
+<td class="org-left">C</td>
+<td class="org-left">E</td>
+<td class="org-left">J</td>
+<td class="org-left">K</td>
+</tr>
+
+<tr>
+<td class="org-left">A</td>
+<td class="org-left">C</td>
+<td class="org-left">E</td>
+<td class="org-left">J</td>
+<td class="org-left">L</td>
+</tr>
+
+<tr>
+<td class="org-left">A</td>
+<td class="org-left">C</td>
+<td class="org-left">H</td>
+<td class="org-left">&nbsp;</td>
+<td class="org-left">&nbsp;</td>
+</tr>
+
+<tr>
+<td class="org-left">A</td>
+<td class="org-left">C</td>
+<td class="org-left">H</td>
+<td class="org-left">G</td>
+<td class="org-left">&nbsp;</td>
+</tr>
+
+<tr>
+<td class="org-left">A</td>
+<td class="org-left">C</td>
+<td class="org-left">H</td>
+<td class="org-left">G</td>
+<td class="org-left">I</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<div id="outline-container-orgd591ece" class="outline-3">
+<h3 id="orgd591ece">Korteste stier for vektede grafer (Dijkstra)</h3>
+<div class="outline-text-3" id="text-orgd591ece">
+<p>
+La oss returnere til det mer interessante spørsmålet der vi har vekter på
+kantene. For en graf <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>G</mi><mo>=</mo><mo stretchy="false">(</mo><mi>V</mi><mo separator="true">,</mo><mi>E</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">G = (V, E)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal">G</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right: 0.22222em;">V</span><span class="mpunct">,</span><span class="mspace" style="margin-right: 0.166667em;"></span><span class="mord mathnormal" style="margin-right: 0.05764em;">E</span><span class="mclose">)</span></span></span></span></span> med vektfunksjon <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>w</mi></mrow><annotation encoding="application/x-tex">w</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.02691em;">w</span></span></span></span></span>, er den korteste
+stien mellom <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mo>∈</mo><mi>V</mi></mrow><annotation encoding="application/x-tex">s \in V</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.5782em; vertical-align: -0.0391em;"></span><span class="mord mathnormal">s</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">∈</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.22222em;">V</span></span></span></span></span> og <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>t</mi><mo>∈</mo><mi>V</mi></mrow><annotation encoding="application/x-tex">t \in V</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.65418em; vertical-align: -0.0391em;"></span><span class="mord mathnormal">t</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">∈</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.22222em;">V</span></span></span></span></span> er den stien <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>v</mi><mn>1</mn></msub><mo separator="true">,</mo><msub><mi>v</mi><mn>2</mn></msub><mo separator="true">,</mo><mo>…</mo><mo separator="true">,</mo><msub><mi>v</mi><mi>n</mi></msub></mrow><annotation encoding="application/x-tex">v_1, v_2, \dots, v_n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.625em; vertical-align: -0.19444em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right: 0.03588em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height: 0.301108em;"><span class="" style="top: -2.55em; margin-left: -0.03588em; margin-right: 0.05em;"><span class="pstrut" style="height: 2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height: 0.15em;"><span class=""></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right: 0.166667em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right: 0.03588em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height: 0.301108em;"><span class="" style="top: -2.55em; margin-left: -0.03588em; margin-right: 0.05em;"><span class="pstrut" style="height: 2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height: 0.15em;"><span class=""></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right: 0.166667em;"></span><span class="minner">…</span><span class="mspace" style="margin-right: 0.166667em;"></span><span class="mpunct">,</span><span class="mspace" style="margin-right: 0.166667em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right: 0.03588em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height: 0.151392em;"><span class="" style="top: -2.55em; margin-left: -0.03588em; margin-right: 0.05em;"><span class="pstrut" style="height: 2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">n</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height: 0.15em;"><span class=""></span></span></span></span></span></span></span></span></span></span> slik at <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>v</mi><mn>1</mn></msub><mo>=</mo><mi>s</mi></mrow><annotation encoding="application/x-tex">v_1 =
+   s</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.58056em; vertical-align: -0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right: 0.03588em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height: 0.301108em;"><span class="" style="top: -2.55em; margin-left: -0.03588em; margin-right: 0.05em;"><span class="pstrut" style="height: 2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height: 0.15em;"><span class=""></span></span></span></span></span></span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal">s</span></span></span></span></span> og <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>v</mi><mi>n</mi></msub><mo>=</mo><mi>t</mi></mrow><annotation encoding="application/x-tex">v_n = t</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.58056em; vertical-align: -0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right: 0.03588em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height: 0.151392em;"><span class="" style="top: -2.55em; margin-left: -0.03588em; margin-right: 0.05em;"><span class="pstrut" style="height: 2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">n</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height: 0.15em;"><span class=""></span></span></span></span></span></span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 0.61508em; vertical-align: 0em;"></span><span class="mord mathnormal">t</span></span></span></span></span> som minimerer <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mrow><mi>n</mi><mo>−</mo><mn>1</mn></mrow></msubsup><mi>w</mi><mo stretchy="false">(</mo><msub><mi>v</mi><mi>i</mi></msub><mo separator="true">,</mo><msub><mi>v</mi><mrow><mi>i</mi><mo>+</mo><mn>1</mn></mrow></msub><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\sum_{i=1}^{n-1}w(v_i, v_{i+1})</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1.25372em; vertical-align: -0.29971em;"></span><span class="mop"><span class="mop op-symbol small-op" style="position: relative; top: -5e-06em;">∑</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height: 0.954008em;"><span class="" style="top: -2.40029em; margin-left: 0em; margin-right: 0.05em;"><span class="pstrut" style="height: 2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span><span class="mrel mtight">=</span><span class="mord mtight">1</span></span></span></span><span class="" style="top: -3.2029em; margin-right: 0.05em;"><span class="pstrut" style="height: 2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">n</span><span class="mbin mtight">−</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height: 0.29971em;"><span class=""></span></span></span></span></span></span><span class="mspace" style="margin-right: 0.166667em;"></span><span class="mord mathnormal" style="margin-right: 0.02691em;">w</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal" style="margin-right: 0.03588em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height: 0.311664em;"><span class="" style="top: -2.55em; margin-left: -0.03588em; margin-right: 0.05em;"><span class="pstrut" style="height: 2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height: 0.15em;"><span class=""></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right: 0.166667em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right: 0.03588em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height: 0.311664em;"><span class="" style="top: -2.55em; margin-left: -0.03588em; margin-right: 0.05em;"><span class="pstrut" style="height: 2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span><span class="mbin mtight">+</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height: 0.208331em;"><span class=""></span></span></span></span></span></span><span class="mclose">)</span></span></span></span></span>. Det vil si at den totale
+vekten (eller kostnadden) av en sti er gitt av summene av vektene til
+kantene som utgjør stien.
+</p>
+
+<p>
+Vi skal nå implementere Dijkstra sin algoritme for korteste vei fra en node
+til alle andre noder. Der DFS bruker en stack og BFS bruker en FIFO-kø, så
+bruker Dijkstra heller en <i>prioritetskø</i>. En prioritetskø trenger en total
+ordning over elementene som legges på køen, altså et sorteringskriterie.
+Tradisjonelt beskriver man Dijkstra ved å si at prioriteten til et element
+er gitt av en avstandsmatrise <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi></mrow><annotation encoding="application/x-tex">D</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.02778em;">D</span></span></span></span></span>, slik at for en gitt <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>v</mi><mo>∈</mo><mi>V</mi></mrow><annotation encoding="application/x-tex">v \in V</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.5782em; vertical-align: -0.0391em;"></span><span class="mord mathnormal" style="margin-right: 0.03588em;">v</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">∈</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.22222em;">V</span></span></span></span></span> så angir
+<span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi><mo stretchy="false">[</mo><mi>v</mi><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">D[v]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathnormal" style="margin-right: 0.02778em;">D</span><span class="mopen">[</span><span class="mord mathnormal" style="margin-right: 0.03588em;">v</span><span class="mclose">]</span></span></span></span></span> den korteste avstanden fra startnoden til <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>v</mi></mrow><annotation encoding="application/x-tex">v</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.03588em;">v</span></span></span></span></span> som er oppdaget så
+langt. Dersom <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>v</mi></mrow><annotation encoding="application/x-tex">v</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.03588em;">v</span></span></span></span></span> ikke er oppdaget enda har den avstand <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">∞</mi></mrow><annotation encoding="application/x-tex">\infty</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord">∞</span></span></span></span></span>.
+</p>
+
+<p>
+En utfordring med å implementere Dijkstra er et steg som kalles <i>edge
+relaxation</i>. Hvis vi er ved en node <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>u</mi><mo>∈</mo><mi>V</mi></mrow><annotation encoding="application/x-tex">u \in V</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.5782em; vertical-align: -0.0391em;"></span><span class="mord mathnormal">u</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">∈</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.22222em;">V</span></span></span></span></span> som har en kant til en node <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>v</mi><mo>∈</mo><mi>V</mi></mrow><annotation encoding="application/x-tex">v \in
+   V</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.5782em; vertical-align: -0.0391em;"></span><span class="mord mathnormal" style="margin-right: 0.03588em;">v</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">∈</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.22222em;">V</span></span></span></span></span> med vekt <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>w</mi><mo stretchy="false">(</mo><mi>u</mi><mo separator="true">,</mo><mi>v</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">w(u, v)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathnormal" style="margin-right: 0.02691em;">w</span><span class="mopen">(</span><span class="mord mathnormal">u</span><span class="mpunct">,</span><span class="mspace" style="margin-right: 0.166667em;"></span><span class="mord mathnormal" style="margin-right: 0.03588em;">v</span><span class="mclose">)</span></span></span></span></span>, så er spørsmålet om vi har funnet en kortere vei til
+<span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>v</mi></mrow><annotation encoding="application/x-tex">v</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.03588em;">v</span></span></span></span></span> enn den som er funnet så langt. Den korteste veien til en node så langt
+er gitt av <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi></mrow><annotation encoding="application/x-tex">D</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.02778em;">D</span></span></span></span></span>, som vil si at det har kostet <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi><mo stretchy="false">[</mo><mi>u</mi><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">D[u]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathnormal" style="margin-right: 0.02778em;">D</span><span class="mopen">[</span><span class="mord mathnormal">u</span><span class="mclose">]</span></span></span></span></span> å komme til <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>u</mi></mrow><annotation encoding="application/x-tex">u</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal">u</span></span></span></span></span>, og det
+vil koste <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi><mo stretchy="false">[</mo><mi>u</mi><mo stretchy="false">]</mo><mo>+</mo><mi>w</mi><mo stretchy="false">(</mo><mi>u</mi><mo separator="true">,</mo><mi>v</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">D[u] + w(u, v)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathnormal" style="margin-right: 0.02778em;">D</span><span class="mopen">[</span><span class="mord mathnormal">u</span><span class="mclose">]</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathnormal" style="margin-right: 0.02691em;">w</span><span class="mopen">(</span><span class="mord mathnormal">u</span><span class="mpunct">,</span><span class="mspace" style="margin-right: 0.166667em;"></span><span class="mord mathnormal" style="margin-right: 0.03588em;">v</span><span class="mclose">)</span></span></span></span></span> å komme til <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>v</mi></mrow><annotation encoding="application/x-tex">v</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.03588em;">v</span></span></span></span></span> via <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>u</mi></mrow><annotation encoding="application/x-tex">u</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal">u</span></span></span></span></span>. Dersom <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi><mo stretchy="false">[</mo><mi>u</mi><mo stretchy="false">]</mo><mo>+</mo><mi>w</mi><mo stretchy="false">(</mo><mi>u</mi><mo separator="true">,</mo><mi>v</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">D[u] + w(u, v)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathnormal" style="margin-right: 0.02778em;">D</span><span class="mopen">[</span><span class="mord mathnormal">u</span><span class="mclose">]</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathnormal" style="margin-right: 0.02691em;">w</span><span class="mopen">(</span><span class="mord mathnormal">u</span><span class="mpunct">,</span><span class="mspace" style="margin-right: 0.166667em;"></span><span class="mord mathnormal" style="margin-right: 0.03588em;">v</span><span class="mclose">)</span></span></span></span></span>
+er mindre enn <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi><mo stretchy="false">[</mo><mi>v</mi><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">D[v]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathnormal" style="margin-right: 0.02778em;">D</span><span class="mopen">[</span><span class="mord mathnormal" style="margin-right: 0.03588em;">v</span><span class="mclose">]</span></span></span></span></span>, så må prioriteten til <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>v</mi></mrow><annotation encoding="application/x-tex">v</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.03588em;">v</span></span></span></span></span> erstattes. Steget kan
+beskrives slik, der <code>queue</code> referer til prioritetskøen og <code>dist</code> refererer til
+avstandsmatrisen <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi></mrow><annotation encoding="application/x-tex">D</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.02778em;">D</span></span></span></span></span>:
+</p>
+
+<pre class="example" id="org0328f2a">c &lt;- dist[u] + w(u, v)
+if c &lt; dist[v]:
+  dist[v] &lt;- c
+  DecreasePriority(queue, v, c)
+</pre>
+
+<p>
+Vanskeligheten med dette er at prioritetskøene vi har sett så langt (der
+binære heaps er den mest effektive) ikke har noen måte å oppdatere
+prioriteten for en gitt node.<sup><a id="fnr.1" class="footref" href="https://larstvei.github.io/grafalgoritmer/#fn.1" role="doc-backlink">1</a></sup> I Python har vi ikke tilgang på en
+prioritetskø som støtter å endre prioriteten til et element på logaritmisk
+tid, så derfor vil bruke en litt annen strategi, som ligger litt tettere opp
+mot bredde-først søk.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python blur" style="cursor: pointer;"><button class="copy-code-button" type="button"><span class="copy-hoverbox">Copied!</span></button><span style="color: #673AB7;">from</span> heapq <span style="color: #673AB7;">import</span> heappush, heappop
+
+<span style="color: #673AB7;">def</span> <span style="color: #263238; font-weight: bold;">dijkstra</span>(G, s):
+    <span style="color: #263238; font-weight: bold;">V</span>, <span style="color: #263238; font-weight: bold;">E</span>, <span style="color: #263238; font-weight: bold;">w</span> = G
+    <span style="color: #263238; font-weight: bold;">queue</span> = [(0, s)]
+    <span style="color: #263238; font-weight: bold;">dist</span> = defaultdict(<span style="color: #673AB7;">lambda</span>: <span style="color: #673AB7;">float</span>(<span style="color: #90A4AE;">'inf'</span>))
+    <span style="color: #263238; font-weight: bold;">dist</span>[s] = 0
+
+    <span style="color: #673AB7;">while</span> queue:
+        <span style="color: #263238; font-weight: bold;">cost</span>, <span style="color: #263238; font-weight: bold;">u</span> = heappop(queue)
+        <span style="color: #673AB7;">if</span> cost != dist[u]:
+            <span style="color: #673AB7;">continue</span>
+        <span style="color: #673AB7;">for</span> v <span style="color: #673AB7;">in</span> E[u]:
+            <span style="color: #263238; font-weight: bold;">c</span> = cost + w[(u, v)]
+            <span style="color: #673AB7;">if</span> c &lt; dist[v]:
+                <span style="color: #263238; font-weight: bold;">dist</span>[v] = c
+                heappush(queue, (c, v))
+
+    <span style="color: #673AB7;">return</span> dist
+</pre>
+</div>
+
+<p>
+Vi definerer en kø som starter med å inneholde et par <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mn>0</mn><mo separator="true">,</mo><mi>s</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(0, s)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right: 0.166667em;"></span><span class="mord mathnormal">s</span><span class="mclose">)</span></span></span></span></span>, der <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0</mn></mrow><annotation encoding="application/x-tex">0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.64444em; vertical-align: 0em;"></span><span class="mord">0</span></span></span></span></span> er
+avstanden fra <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi></mrow><annotation encoding="application/x-tex">s</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal">s</span></span></span></span></span> til <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi></mrow><annotation encoding="application/x-tex">s</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal">s</span></span></span></span></span>. I tillegg lager vi en avstandsmatrise, som her er
+implementert som en <code>defaultdict</code>, slik at alle noder implisitt har en
+avstand på <code>float('inf')</code>, som er det nærmeste vi kommer <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">∞</mi></mrow><annotation encoding="application/x-tex">\infty</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord">∞</span></span></span></span></span>
+representert i Python, og setter avstanden til <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi></mrow><annotation encoding="application/x-tex">s</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal">s</span></span></span></span></span> lik <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0</mn></mrow><annotation encoding="application/x-tex">0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.64444em; vertical-align: 0em;"></span><span class="mord">0</span></span></span></span></span>.
+</p>
+
+<p>
+Vi traverserer så grafen ved å plukke noder fra prioritetskøen. Hver node
+<span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>u</mi></mrow><annotation encoding="application/x-tex">u</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal">u</span></span></span></span></span> som tas av prioritetskøen har en assosiert kostnad. Når en node <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>u</mi></mrow><annotation encoding="application/x-tex">u</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal">u</span></span></span></span></span> er
+tatt av køen, går vi gjennom hver kant fra <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>u</mi></mrow><annotation encoding="application/x-tex">u</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal">u</span></span></span></span></span> til en nabo <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>v</mi></mrow><annotation encoding="application/x-tex">v</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.03588em;">v</span></span></span></span></span>. Dersom
+kostnaden ved å gå til <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>v</mi></mrow><annotation encoding="application/x-tex">v</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.03588em;">v</span></span></span></span></span> via <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>u</mi></mrow><annotation encoding="application/x-tex">u</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal">u</span></span></span></span></span> er den laveste observert så langt, så
+oppdateres avstanden til <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>v</mi></mrow><annotation encoding="application/x-tex">v</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.03588em;">v</span></span></span></span></span> i <code>dist</code>, og <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>v</mi></mrow><annotation encoding="application/x-tex">v</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.03588em;">v</span></span></span></span></span> legges på køen med den nye
+kostnaden som prioritet.
+</p>
+
+<p>
+Vi kan nå beregne avstanden til alle noder fra <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi></mrow><annotation encoding="application/x-tex">A</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal">A</span></span></span></span></span>. Python-magien her kan
+fint ignoreres, og er der kun for å få en finere utskrift.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python blur" style="cursor: pointer;"><button class="copy-code-button" type="button"><span class="copy-hoverbox">Copied!</span></button><span style="color: #263238; font-weight: bold;">dist</span> = dijkstra(G, <span style="color: #90A4AE;">'A'</span>)
+<span style="color: #673AB7;">list</span>(<span style="color: #673AB7;">zip</span>(*<span style="color: #673AB7;">sorted</span>(dist.items())))
+</pre>
+</div>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col class="org-right">
+
+<col class="org-right">
+
+<col class="org-right">
+
+<col class="org-right">
+
+<col class="org-right">
+
+<col class="org-right">
+
+<col class="org-right">
+
+<col class="org-right">
+
+<col class="org-right">
+
+<col class="org-right">
+
+<col class="org-right">
+
+<col class="org-right">
+</colgroup>
+<tbody>
+<tr>
+<td class="org-right">A</td>
+<td class="org-right">B</td>
+<td class="org-right">C</td>
+<td class="org-right">D</td>
+<td class="org-right">E</td>
+<td class="org-right">F</td>
+<td class="org-right">G</td>
+<td class="org-right">H</td>
+<td class="org-right">I</td>
+<td class="org-right">J</td>
+<td class="org-right">K</td>
+<td class="org-right">L</td>
+</tr>
+
+<tr>
+<td class="org-right">0</td>
+<td class="org-right">13</td>
+<td class="org-right">6</td>
+<td class="org-right">14</td>
+<td class="org-right">14</td>
+<td class="org-right">16</td>
+<td class="org-right">41</td>
+<td class="org-right">26</td>
+<td class="org-right">46</td>
+<td class="org-right">32</td>
+<td class="org-right">48</td>
+<td class="org-right">36</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+Et spørsmål man bør stille seg, er om denne implementasjonen av Dijkstra har
+samme kjøretidskompleksitet som forventet av Dijkstra, altså <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi mathvariant="normal">∣</mi><mi>E</mi><mi mathvariant="normal">∣</mi><mo>⋅</mo><mi>log</mi><mo>⁡</mo><mo stretchy="false">(</mo><mi mathvariant="normal">∣</mi><mi>V</mi><mi mathvariant="normal">∣</mi><mo stretchy="false">)</mo><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(|E| \cdot
+   \log(|V|))</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathnormal" style="margin-right: 0.02778em;">O</span><span class="mopen">(</span><span class="mord">∣</span><span class="mord mathnormal" style="margin-right: 0.05764em;">E</span><span class="mord">∣</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mop">lo<span style="margin-right: 0.01389em;">g</span></span><span class="mopen">(</span><span class="mord">∣</span><span class="mord mathnormal" style="margin-right: 0.22222em;">V</span><span class="mord">∣</span><span class="mclose">))</span></span></span></span></span>. Intuitivt betyr det at vi har tid til å gå gjennom alle kantene
+i grafen og for hver av disse gjøre en <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>log</mi><mo>⁡</mo><mo stretchy="false">(</mo><mi mathvariant="normal">∣</mi><mi>V</mi><mi mathvariant="normal">∣</mi><mo stretchy="false">)</mo><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(\log(|V|))</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathnormal" style="margin-right: 0.02778em;">O</span><span class="mopen">(</span><span class="mop">lo<span style="margin-right: 0.01389em;">g</span></span><span class="mopen">(</span><span class="mord">∣</span><span class="mord mathnormal" style="margin-right: 0.22222em;">V</span><span class="mord">∣</span><span class="mclose">))</span></span></span></span></span> operasjon, slik som
+innsetting og sletting i en binær heap. I denne implementasjonen risikeres
+det å legge samme node på heapen flere ganger! Da blir spørsmålet, hvor
+mange elementer kan legges på heapen totalt? I verste tilfelle, så kan en
+node legges til på køen av alle sine naboer (altså like mange ganger som det
+finnes kanter som går til noden). Det vil si at vi i verste tilfellet vil
+legge like mange elementer på heapen som antallet kanter i grafen, altså
+<span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">∣</mi><mi>E</mi><mi mathvariant="normal">∣</mi></mrow><annotation encoding="application/x-tex">|E|</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord">∣</span><span class="mord mathnormal" style="margin-right: 0.05764em;">E</span><span class="mord">∣</span></span></span></span></span>. Dermed ser det ut som at vi får <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi mathvariant="normal">∣</mi><mi>E</mi><mi mathvariant="normal">∣</mi><mo>⋅</mo><mi>l</mi><mi>o</mi><mi>g</mi><mo stretchy="false">(</mo><mi mathvariant="normal">∣</mi><mi>E</mi><mi mathvariant="normal">∣</mi><mo stretchy="false">)</mo><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(|E| \cdot log(|E|))</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathnormal" style="margin-right: 0.02778em;">O</span><span class="mopen">(</span><span class="mord">∣</span><span class="mord mathnormal" style="margin-right: 0.05764em;">E</span><span class="mord">∣</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathnormal" style="margin-right: 0.01968em;">l</span><span class="mord mathnormal">o</span><span class="mord mathnormal" style="margin-right: 0.03588em;">g</span><span class="mopen">(</span><span class="mord">∣</span><span class="mord mathnormal" style="margin-right: 0.05764em;">E</span><span class="mord">∣</span><span class="mclose">))</span></span></span></span></span> i kjøretid, som
+virker mindre effektivt siden kan finnes mange flere kanter enn noder i en
+graf. Denne intuisjonen stemmer ikke helt, og det bunner i at <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>log</mi><mo>⁡</mo><mo stretchy="false">(</mo><msup><mi>x</mi><mn>2</mn></msup><mo stretchy="false">)</mo><mo>≤</mo><mn>2</mn><mo>⋅</mo><mi>log</mi><mo>⁡</mo><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log(x^2) \leq 2
+   \cdot \log(x)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1.06411em; vertical-align: -0.25em;"></span><span class="mop">lo<span style="margin-right: 0.01389em;">g</span></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height: 0.814108em;"><span class="" style="top: -3.063em; margin-right: 0.05em;"><span class="pstrut" style="height: 2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mclose">)</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">≤</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 0.64444em; vertical-align: 0em;"></span><span class="mord">2</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mop">lo<span style="margin-right: 0.01389em;">g</span></span><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mclose">)</span></span></span></span></span> for alle <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0</mn><mo>&lt;</mo><mi>x</mi></mrow><annotation encoding="application/x-tex">0 &lt; x</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.68354em; vertical-align: -0.0391em;"></span><span class="mord">0</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">&lt;</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal">x</span></span></span></span></span>. Antall kanter i grafen kan ikke være mer enn
+kvadratisk med hensyn til antall noder,<sup><a id="fnr.2" class="footref" href="https://larstvei.github.io/grafalgoritmer/#fn.2" role="doc-backlink">2</a></sup> altså er <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi mathvariant="normal">∣</mi><mi>E</mi><mi mathvariant="normal">∣</mi><mo>⋅</mo><mi>l</mi><mi>o</mi><mi>g</mi><mo stretchy="false">(</mo><mi mathvariant="normal">∣</mi><mi>E</mi><mi mathvariant="normal">∣</mi><mo stretchy="false">)</mo><mo stretchy="false">)</mo><mo>=</mo><mi>O</mi><mo stretchy="false">(</mo><mi mathvariant="normal">∣</mi><mi>E</mi><mi mathvariant="normal">∣</mi><mo>⋅</mo><mi>l</mi><mi>o</mi><mi>g</mi><mo stretchy="false">(</mo><mi mathvariant="normal">∣</mi><mi>V</mi><mi mathvariant="normal">∣</mi><mo stretchy="false">)</mo><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(|E| \cdot
+   log(|E|)) = O(|E| \cdot log(|V|))</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathnormal" style="margin-right: 0.02778em;">O</span><span class="mopen">(</span><span class="mord">∣</span><span class="mord mathnormal" style="margin-right: 0.05764em;">E</span><span class="mord">∣</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathnormal" style="margin-right: 0.01968em;">l</span><span class="mord mathnormal">o</span><span class="mord mathnormal" style="margin-right: 0.03588em;">g</span><span class="mopen">(</span><span class="mord">∣</span><span class="mord mathnormal" style="margin-right: 0.05764em;">E</span><span class="mord">∣</span><span class="mclose">))</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathnormal" style="margin-right: 0.02778em;">O</span><span class="mopen">(</span><span class="mord">∣</span><span class="mord mathnormal" style="margin-right: 0.05764em;">E</span><span class="mord">∣</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathnormal" style="margin-right: 0.01968em;">l</span><span class="mord mathnormal">o</span><span class="mord mathnormal" style="margin-right: 0.03588em;">g</span><span class="mopen">(</span><span class="mord">∣</span><span class="mord mathnormal" style="margin-right: 0.22222em;">V</span><span class="mord">∣</span><span class="mclose">))</span></span></span></span></span>, og dermed har denne implementasjonen samme
+kjøretidskompleksitet som en mer tradisjonell implementasjon av Dijkstra.
+</p>
+
+<p>
+På samme måte som med bredde-først søk kan de konkrete stiene hentes ut ved
+å for hver node <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>v</mi></mrow><annotation encoding="application/x-tex">v</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.03588em;">v</span></span></span></span></span> lagre hvilken node <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>u</mi></mrow><annotation encoding="application/x-tex">u</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal">u</span></span></span></span></span> som la <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>v</mi></mrow><annotation encoding="application/x-tex">v</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.03588em;">v</span></span></span></span></span> på prioritetskøen.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python blur" style="cursor: pointer;"><button class="copy-code-button" type="button"><span class="copy-hoverbox">Copied!</span></button><span style="color: #673AB7;">def</span> <span style="color: #263238; font-weight: bold;">shortest_paths_from</span>(G, s):
+    <span style="color: #263238; font-weight: bold;">V</span>, <span style="color: #263238; font-weight: bold;">E</span>, <span style="color: #263238; font-weight: bold;">w</span> = G
+    <span style="color: #263238; font-weight: bold;">queue</span> = [(0, s)]
+    <span style="color: #263238; font-weight: bold;">dist</span> = defaultdict(<span style="color: #673AB7;">lambda</span>: <span style="color: #673AB7;">float</span>(<span style="color: #90A4AE;">'inf'</span>))
+    <span style="color: #263238; font-weight: bold;">parents</span> = {s : <span style="color: #673AB7;">None</span>}
+    <span style="color: #263238; font-weight: bold;">dist</span>[s] = 0
+
+    <span style="color: #673AB7;">while</span> queue:
+        <span style="color: #263238; font-weight: bold;">cost</span>, <span style="color: #263238; font-weight: bold;">u</span> = heappop(queue)
+        <span style="color: #673AB7;">if</span> cost != dist[u]:
+            <span style="color: #673AB7;">continue</span>
+        <span style="color: #673AB7;">for</span> v <span style="color: #673AB7;">in</span> E[u]:
+            <span style="color: #263238; font-weight: bold;">c</span> = cost + w[(u, v)]
+            <span style="color: #673AB7;">if</span> c &lt; dist[v]:
+                <span style="color: #263238; font-weight: bold;">dist</span>[v] = c
+                heappush(queue, (c, v))
+                <span style="color: #263238; font-weight: bold;">parents</span>[v] = u
+
+    <span style="color: #673AB7;">return</span> parents
+</pre>
+</div>
+
+<p>
+Vi kan nå se på treet vi får fra å kjøre Dijkstra, og fra det kan vi lese ut
+de korteste stiene fra <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi></mrow><annotation encoding="application/x-tex">A</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal">A</span></span></span></span></span> til alle andre noder.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python blur" style="cursor: pointer;"><button class="copy-code-button" type="button"><span class="copy-hoverbox">Copied!</span></button><span style="color: #673AB7;">def</span> <span style="color: #263238; font-weight: bold;">draw_parents_weighted</span>(G, parents, name):
+    <span style="color: #263238; font-weight: bold;">V</span>, <span style="color: #263238; font-weight: bold;">_</span>, <span style="color: #263238; font-weight: bold;">w</span> = G
+    <span style="color: #263238; font-weight: bold;">dot</span> = graphviz.Graph()
+    <span style="color: #673AB7;">for</span> u <span style="color: #673AB7;">in</span> parents:
+        <span style="color: #263238; font-weight: bold;">v</span> = parents[u]
+        <span style="color: #673AB7;">if</span> v:
+            dot.edge(u, v, label=<span style="color: #673AB7;">str</span>(w[(u, v)]))
+    dot.render(name, <span style="color: #673AB7;">format</span>=<span style="color: #90A4AE;">'svg'</span>)
+
+draw_parents_weighted(G, shortest_paths_from(G, <span style="color: #90A4AE;">'A'</span>), <span style="color: #90A4AE;">'dijkstra_spanningtree'</span>)
+</pre>
+</div>
+
+
+<div id="org7b0ada6" class="figure">
+<p><img src="./Utvalgte grafalgoritmer_files/dijkstra_spanningtree.svg" alt="dijkstra_spanningtree.svg" class="org-svg">
+</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org4db7bff" class="outline-2">
+<h2 id="org4db7bff">Minimale spenntrær</h2>
+<div class="outline-text-2" id="text-org4db7bff">
+<p>
+Vi har nå såvidt vært innom spenntrær. Ordet er veldig beskrivende: vi ønsker
+et tre som spenner en graf <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>G</mi><mo>=</mo><mo stretchy="false">(</mo><mi>V</mi><mo separator="true">,</mo><mi>E</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">G = (V, E)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal">G</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right: 0.22222em;">V</span><span class="mpunct">,</span><span class="mspace" style="margin-right: 0.166667em;"></span><span class="mord mathnormal" style="margin-right: 0.05764em;">E</span><span class="mclose">)</span></span></span></span></span>, altså at et tre som kobler alle
+nodene i <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>V</mi></mrow><annotation encoding="application/x-tex">V</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.22222em;">V</span></span></span></span></span> og kun bruker kanter fra <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>E</mi></mrow><annotation encoding="application/x-tex">E</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.05764em;">E</span></span></span></span></span>. Nå skal vi se på hvordan vi kan
+finne et <i>minimalt</i> spenntre, altså et tre som spenner grafen slik at den
+totale vekten av kantene er minimert. Vi skal kun løse dette problemet for
+urettede og vektede grafer (i motsetning fra BFS, DFS og Dijkstra, som
+fungerer like godt på rettede grafer) som vi antar er sammenhengende.
+</p>
+</div>
+
+<div id="outline-container-org6e38e61" class="outline-3">
+<h3 id="org6e38e61">Prims algoritme</h3>
+<div class="outline-text-3" id="text-org6e38e61">
+<p>
+På forelesning dekker vi tre algoritmer for minimale spenntrær. Her kommer
+vi kun til å se på Prims algoritme. Den har store likhetstrekk til Dijkstra.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python blur" style="cursor: pointer;"><button class="copy-code-button" type="button"><span class="copy-hoverbox">Copied!</span></button><span style="color: #673AB7;">def</span> <span style="color: #263238; font-weight: bold;">prim</span>(G):
+    <span style="color: #263238; font-weight: bold;">V</span>, <span style="color: #263238; font-weight: bold;">E</span>, <span style="color: #263238; font-weight: bold;">w</span> = G
+    <span style="color: #90A4AE;"># </span><span style="color: #90A4AE;">Pick arbitrary start vertex</span>
+    <span style="color: #263238; font-weight: bold;">s</span> = <span style="color: #673AB7;">next</span>(<span style="color: #673AB7;">iter</span>(V))
+    <span style="color: #263238; font-weight: bold;">queue</span> = [(0, s, <span style="color: #673AB7;">None</span>)]
+    <span style="color: #263238; font-weight: bold;">parents</span> = <span style="color: #673AB7;">dict</span>()
+
+    <span style="color: #673AB7;">while</span> queue:
+        <span style="color: #263238; font-weight: bold;">_</span>, <span style="color: #263238; font-weight: bold;">u</span>, <span style="color: #263238; font-weight: bold;">p</span> = heappop(queue)
+        <span style="color: #673AB7;">if</span> u <span style="color: #673AB7;">in</span> parents:
+            <span style="color: #673AB7;">continue</span>
+        <span style="color: #263238; font-weight: bold;">parents</span>[u] = p
+        <span style="color: #673AB7;">for</span> v <span style="color: #673AB7;">in</span> E[u]:
+            heappush(queue, (w[(u, v)], v, u))
+
+    <span style="color: #673AB7;">return</span> parents
+</pre>
+</div>
+
+<p>
+Vi definerer en kø som starter med å inneholde et trippel, der <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi></mrow><annotation encoding="application/x-tex">s</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal">s</span></span></span></span></span> er en
+vilkårlig node, <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0</mn></mrow><annotation encoding="application/x-tex">0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.64444em; vertical-align: 0em;"></span><span class="mord">0</span></span></span></span></span> er den assosierte vekten, og <code>None</code> representerer
+<i>fraværet</i> av en node som la <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi></mrow><annotation encoding="application/x-tex">s</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal">s</span></span></span></span></span> på prioritetskøen. I tillegg har vi et map
+<code>parents</code> for å holde på foreldre-pekere. Som vi har sett tidligere, så kan
+vi bruke et slikt map for å representere et spenntre etter en traversering.
+</p>
+
+<p>
+Vi traverserer så grafen ved å ta ut noder fra prioritetskøen. Her
+prioriterer vi nodene etter vekten på kanten, snarere enn den akkumulerte
+vekten av stien så langt (som vi gjorde for Dijkstra). For hver node <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>u</mi></mrow><annotation encoding="application/x-tex">u</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal">u</span></span></span></span></span> vi
+tar av prioritetskøen har vi en assosiert kostnad og en node <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi></mrow><annotation encoding="application/x-tex">p</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.625em; vertical-align: -0.19444em;"></span><span class="mord mathnormal">p</span></span></span></span></span> som la <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>u</mi></mrow><annotation encoding="application/x-tex">u</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal">u</span></span></span></span></span>
+på heapen. Når en node <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>u</mi></mrow><annotation encoding="application/x-tex">u</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal">u</span></span></span></span></span> er tatt av køen legger vi det til i <code>parents</code>
+dersom <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>u</mi></mrow><annotation encoding="application/x-tex">u</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal">u</span></span></span></span></span> ikke forekommer i <code>parents</code> fra før. På denne måten velger vi
+alltid den kanten med lavest vekt som er observert fra en node så langt. Ved
+å alltid velge den kanten med lavest vekt, så er vi også garantert å få det
+treet med lavest total vekt. Dette er et eksempel på en <i>grådig</i> algoritme.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python blur" style="cursor: pointer;"><button class="copy-code-button" type="button"><span class="copy-hoverbox">Copied!</span></button>draw_parents_weighted(G, prim(G), <span style="color: #90A4AE;">'prim_minimal_spanningtree'</span>)
+</pre>
+</div>
+
+
+<div id="orgd55da30" class="figure">
+<p><img src="./Utvalgte grafalgoritmer_files/prim_minimal_spanningtree.svg" alt="prim_minimal_spanningtree.svg" class="org-svg">
+</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org1969b5a" class="outline-2">
+<h2 id="org1969b5a">2-sammenhengende grafer</h2>
+<div class="outline-text-2" id="text-org1969b5a">
+<p>
+Grafen som vi jobber med er <i>sammenhengende</i>. Det finnes altså en sti mellom
+alle par av noder i <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>G</mi></mrow><annotation encoding="application/x-tex">G</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal">G</span></span></span></span></span>. I mange anvendelser så ønsker man ikke bare at
+grafen skal være sammenhengende, men også at den skal være
+<i>2-sammenhengende</i> (også kalt <i>bikonnektiv</i>). Det betyr at hvis en hvilken
+som helst node <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>v</mi><mo>∈</mo><mi>V</mi></mrow><annotation encoding="application/x-tex">v \in V</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.5782em; vertical-align: -0.0391em;"></span><span class="mord mathnormal" style="margin-right: 0.03588em;">v</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">∈</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.22222em;">V</span></span></span></span></span> fjernes fra grafen, så vil grafen <i>fremdeles</i> være
+sammenhengende. Mer generelt sier vi at en graf er <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi></mrow><annotation encoding="application/x-tex">k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.69444em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.03148em;">k</span></span></span></span></span>-sammenhengende, så
+hvis grafen forblir sammenhengende hvis man fjerner færre enn <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi></mrow><annotation encoding="application/x-tex">k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.69444em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.03148em;">k</span></span></span></span></span> noder.
+</p>
+
+<p>
+Dette er et nyttig begrep i anvendelser der det er et ønske om redundans. For
+eksempel kan du se for deg en graf som representerer Ruter sitt
+kollektivnett, der noder representerer holdeplasser, og kanter representerer
+at det går en buss, trikk eller bane mellom holdeplassene. Dersom denne
+grafen er 2-sammenhengende, så betyr det at dersom det er full stans ved en
+holdeplass, så vil reisende fremdeles kunne komme frem til sitt stoppested
+gjennom en annen rute.
+</p>
+</div>
+
+<div id="outline-container-orgfbbace2" class="outline-3">
+<h3 id="orgfbbace2">Er <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>G</mi></mrow><annotation encoding="application/x-tex">G</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal">G</span></span></span></span></span> er 2-sammenhengende?</h3>
+<div class="outline-text-3" id="text-orgfbbace2">
+<p>
+La oss sjekke om <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>G</mi></mrow><annotation encoding="application/x-tex">G</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal">G</span></span></span></span></span> er 2-sammenhengende ved å følge definisjonen veldig
+direkte. Med andre ord prøver vi å fjerne hver node <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>v</mi><mo>∈</mo><mi>V</mi></mrow><annotation encoding="application/x-tex">v \in V</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.5782em; vertical-align: -0.0391em;"></span><span class="mord mathnormal" style="margin-right: 0.03588em;">v</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">∈</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.22222em;">V</span></span></span></span></span> fra <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>G</mi></mrow><annotation encoding="application/x-tex">G</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal">G</span></span></span></span></span> og
+sjekke om den resulterende grafen er sammenhengende. Siden grafen er liten,
+så er det lurt å sjekke om den er 2-sammenhengende «for hånd» før du går
+videre.
+</p>
+
+<p>
+Først trenger vi en hjelpeprosedyre for å fjerne en node. Merk at vi vil
+unngå å «ødelegge» den opprinnelige grafen <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>G</mi></mrow><annotation encoding="application/x-tex">G</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal">G</span></span></span></span></span>, må vi passe på å jobbe på
+kopier av <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>V</mi></mrow><annotation encoding="application/x-tex">V</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.22222em;">V</span></span></span></span></span> og <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>E</mi></mrow><annotation encoding="application/x-tex">E</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.05764em;">E</span></span></span></span></span>. Siden vi ikke vil bruke vektene her, så lar vi <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>w</mi></mrow><annotation encoding="application/x-tex">w</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.02691em;">w</span></span></span></span></span>
+forbli uendret (selv om dette er litt stygt).
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python blur" style="cursor: pointer;"><button class="copy-code-button" type="button"><span class="copy-hoverbox">Copied!</span></button><span style="color: #673AB7;">def</span> <span style="color: #263238; font-weight: bold;">removenode</span>(G, u):
+    <span style="color: #263238; font-weight: bold;">V</span>, <span style="color: #263238; font-weight: bold;">E</span>, <span style="color: #263238; font-weight: bold;">w</span> = G
+
+    <span style="color: #263238; font-weight: bold;">newV</span> = V.copy()
+    <span style="color: #263238; font-weight: bold;">newE</span> = E.copy()
+
+    newV.discard(u)
+    <span style="color: #673AB7;">del</span> newE[u]
+
+    <span style="color: #673AB7;">for</span> v <span style="color: #673AB7;">in</span> newV:
+        <span style="color: #263238; font-weight: bold;">neighbors</span> = newE[v].copy()
+        neighbors.discard(u)
+        <span style="color: #263238; font-weight: bold;">newE</span>[v] = neighbors
+
+    <span style="color: #673AB7;">return</span> newV, newE, w
+</pre>
+</div>
+
+<p>
+Vi har allerede implementert et dybde-først søk, så vi kan gjenbruke det
+her. Søket forteller oss hvilke noder som kan nås fra en gitt startnode.
+Siden vi lurer på om alle noder kan nå alle andre, så kan vi starte fra en
+hvilken som helst node <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>v</mi><mo>∈</mo><mi>V</mi></mrow><annotation encoding="application/x-tex">v \in V</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.5782em; vertical-align: -0.0391em;"></span><span class="mord mathnormal" style="margin-right: 0.03588em;">v</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">∈</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.22222em;">V</span></span></span></span></span>.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python blur" style="cursor: pointer;"><button class="copy-code-button" type="button"><span class="copy-hoverbox">Copied!</span></button><span style="color: #673AB7;">def</span> <span style="color: #263238; font-weight: bold;">isbiconnected_naive</span>(G):
+    <span style="color: #263238; font-weight: bold;">V</span>, <span style="color: #263238; font-weight: bold;">E</span>, <span style="color: #263238; font-weight: bold;">_</span> = G
+    <span style="color: #673AB7;">for</span> v <span style="color: #673AB7;">in</span> V:
+        <span style="color: #263238; font-weight: bold;">newV</span>, <span style="color: #263238; font-weight: bold;">_</span>, <span style="color: #263238; font-weight: bold;">_</span> = newG = removenode(G, v)
+        <span style="color: #263238; font-weight: bold;">nodelist</span> = dfs(newG, <span style="color: #673AB7;">next</span>(<span style="color: #673AB7;">iter</span>(newV)))
+        <span style="color: #673AB7;">if</span> <span style="color: #673AB7;">set</span>(nodelist) != newV:
+            <span style="color: #673AB7;">return</span> <span style="color: #673AB7;">False</span>
+    <span style="color: #673AB7;">return</span> <span style="color: #673AB7;">True</span>
+</pre>
+</div>
+
+<p>
+Så, er <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>G</mi></mrow><annotation encoding="application/x-tex">G</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal">G</span></span></span></span></span> 2-sammenhengende?
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python blur" style="cursor: pointer;"><button class="copy-code-button" type="button"><span class="copy-hoverbox">Copied!</span></button>isbiconnected_naive(G)
+</pre>
+</div>
+
+<pre class="example">True
+</pre>
+
+
+<p>
+Ja, <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>G</mi></mrow><annotation encoding="application/x-tex">G</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal">G</span></span></span></span></span> er 2-sammenhengende. Men er <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>G</mi></mrow><annotation encoding="application/x-tex">G</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal">G</span></span></span></span></span> <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>3</mn></mrow><annotation encoding="application/x-tex">3</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.64444em; vertical-align: 0em;"></span><span class="mord">3</span></span></span></span></span>-sammenhengende? Prosedyren
+vår kan kun sjekke om grafen er 2-sammenhengende, men vi kan sjekke
+dette ved hjelp av <code>removenode</code> og <code>isbiconnected_naive</code>.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python blur" style="cursor: pointer;"><button class="copy-code-button" type="button"><span class="copy-hoverbox">Copied!</span></button>isbiconnected_naive(removenode(G, <span style="color: #90A4AE;">'C'</span>))
+</pre>
+</div>
+
+<pre class="example">False
+</pre>
+
+
+<p>
+Ved å først fjerne en velvalgt node <code>C</code>, så kan vi se at grafen ikke lenger er
+2-sammenhengende, som vil si at grafen <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>G</mi></mrow><annotation encoding="application/x-tex">G</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal">G</span></span></span></span></span> er 2-sammenhengende, men
+ikke <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>3</mn></mrow><annotation encoding="application/x-tex">3</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.64444em; vertical-align: 0em;"></span><span class="mord">3</span></span></span></span></span>-sammenhengende.
+</p>
+
+<p>
+For hver node <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>v</mi><mo>∈</mo><mi>V</mi></mrow><annotation encoding="application/x-tex">v \in V</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.5782em; vertical-align: -0.0391em;"></span><span class="mord mathnormal" style="margin-right: 0.03588em;">v</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">∈</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.22222em;">V</span></span></span></span></span>, bygger <code>isbiconnected_naive</code> en ny graf <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>G</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup></mrow><annotation encoding="application/x-tex">G'</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.751892em; vertical-align: 0em;"></span><span class="mord"><span class="mord mathnormal">G</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height: 0.751892em;"><span class="" style="top: -3.063em; margin-right: 0.05em;"><span class="pstrut" style="height: 2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">′</span></span></span></span></span></span></span></span></span></span></span></span></span> med <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>v</mi></mrow><annotation encoding="application/x-tex">v</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.03588em;">v</span></span></span></span></span>
+(og tilhørende kanter) er fjernet, og gjør et DFS-søk. DFS-søk har som kjent
+<span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi mathvariant="normal">∣</mi><mi>V</mi><mi mathvariant="normal">∣</mi><mo>+</mo><mi mathvariant="normal">∣</mi><mi>E</mi><mi mathvariant="normal">∣</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(|V| + |E|)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathnormal" style="margin-right: 0.02778em;">O</span><span class="mopen">(</span><span class="mord">∣</span><span class="mord mathnormal" style="margin-right: 0.22222em;">V</span><span class="mord">∣</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord">∣</span><span class="mord mathnormal" style="margin-right: 0.05764em;">E</span><span class="mord">∣</span><span class="mclose">)</span></span></span></span></span> kjøretid, og det samme har <code>removenode</code>, siden grafen
+essensielt kopieres. Dette gjøres for <i>hver</i> node <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>v</mi><mo>∈</mo><mi>V</mi></mrow><annotation encoding="application/x-tex">v \in V</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.5782em; vertical-align: -0.0391em;"></span><span class="mord mathnormal" style="margin-right: 0.03588em;">v</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">∈</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.22222em;">V</span></span></span></span></span>, som gir oss
+<span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi mathvariant="normal">∣</mi><mi>V</mi><mi mathvariant="normal">∣</mi><mo>⋅</mo><mo stretchy="false">(</mo><mi mathvariant="normal">∣</mi><mi>V</mi><mi mathvariant="normal">∣</mi><mo>+</mo><mi mathvariant="normal">∣</mi><mi>E</mi><mi mathvariant="normal">∣</mi><mo stretchy="false">)</mo><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(|V|\cdot(|V| + |E|))</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathnormal" style="margin-right: 0.02778em;">O</span><span class="mopen">(</span><span class="mord">∣</span><span class="mord mathnormal" style="margin-right: 0.22222em;">V</span><span class="mord">∣</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">∣</span><span class="mord mathnormal" style="margin-right: 0.22222em;">V</span><span class="mord">∣</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord">∣</span><span class="mord mathnormal" style="margin-right: 0.05764em;">E</span><span class="mord">∣</span><span class="mclose">))</span></span></span></span></span> i kjøretid.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgdd264e3" class="outline-3">
+<h3 id="orgdd264e3">Separasjonsnoder og 2-sammenhengenhet</h3>
+<div class="outline-text-3" id="text-orgdd264e3">
+<p>
+Dette problemet kan løses mye mer effektivt enn <code>isbiconnected_naive</code>. Når en
+algoritme følger definisjonen så direkte, pleier vi å si at algoritmen er
+<i>brute force</i>. Nå skal vi se en algoritme som er i <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi mathvariant="normal">∣</mi><mi>V</mi><mi mathvariant="normal">∣</mi><mo>+</mo><mi mathvariant="normal">∣</mi><mi>E</mi><mi mathvariant="normal">∣</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(|V| + |E|)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathnormal" style="margin-right: 0.02778em;">O</span><span class="mopen">(</span><span class="mord">∣</span><span class="mord mathnormal" style="margin-right: 0.22222em;">V</span><span class="mord">∣</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord">∣</span><span class="mord mathnormal" style="margin-right: 0.05764em;">E</span><span class="mord">∣</span><span class="mclose">)</span></span></span></span></span>, altså
+lineær tid med hensyn til størrelsen på grafen. Den gjør et dybde-først søk,
+og lagrer litt ekstra informasjon på veien som lar oss avgjøre hvorvidt
+grafen er 2-sammenhengende eller ikke. Algoritmen går ut på å
+identifisere det som kalles <i>separasjonsnoder</i>.
+</p>
+
+<p>
+En separasjonsnode er intuitivt en node som holder grafen sammenhengende.
+Hvis en separasjonsnode fjernes, så får grafen <i>flere komponenter</i> (altså at
+den ikke lenger sammenhengende). Dersom alle stier mellom to noder går
+gjennom den samme noden <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>v</mi><mo>∈</mo><mi>V</mi></mrow><annotation encoding="application/x-tex">v \in V</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.5782em; vertical-align: -0.0391em;"></span><span class="mord mathnormal" style="margin-right: 0.03588em;">v</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">∈</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.22222em;">V</span></span></span></span></span>, så er <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>v</mi></mrow><annotation encoding="application/x-tex">v</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.03588em;">v</span></span></span></span></span> en separasjonsnode.
+</p>
+
+<p>
+Når vi gjør et dybde-først søk får vi også et spenntre (akkurat slik vi har
+sett for andre traverseringsmetoder). Vi sier at hvis <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>T</mi></mrow><annotation encoding="application/x-tex">T</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.13889em;">T</span></span></span></span></span> er et spenntre for
+<span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>G</mi></mrow><annotation encoding="application/x-tex">G</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal">G</span></span></span></span></span> og <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>u</mi><mo>∈</mo><mi>V</mi></mrow><annotation encoding="application/x-tex">u \in V</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.5782em; vertical-align: -0.0391em;"></span><span class="mord mathnormal">u</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">∈</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.22222em;">V</span></span></span></span></span> er en forfeder av <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>v</mi><mo>∈</mo><mi>V</mi></mrow><annotation encoding="application/x-tex">v \in V</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.5782em; vertical-align: -0.0391em;"></span><span class="mord mathnormal" style="margin-right: 0.03588em;">v</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">∈</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.22222em;">V</span></span></span></span></span> i treet, så kalles en kant fra <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>v</mi></mrow><annotation encoding="application/x-tex">v</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.03588em;">v</span></span></span></span></span>
+til <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>u</mi></mrow><annotation encoding="application/x-tex">u</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal">u</span></span></span></span></span> en <i>tilbakekant</i> (eng: back-edge). Dersom vi har en tilbakekant <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mi>v</mi><mo separator="true">,</mo><mi>u</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(v,
+   u)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right: 0.03588em;">v</span><span class="mpunct">,</span><span class="mspace" style="margin-right: 0.166667em;"></span><span class="mord mathnormal">u</span><span class="mclose">)</span></span></span></span></span> som ikke er i treet, så vet vi at det finnes minst to distinkte stier
+mellom <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>u</mi></mrow><annotation encoding="application/x-tex">u</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal">u</span></span></span></span></span> og <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>v</mi></mrow><annotation encoding="application/x-tex">v</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.03588em;">v</span></span></span></span></span>.
+</p>
+
+<p>
+Det er to egenskaper vi kan sjekke ved et slikt spenntre som sammen
+forteller oss om en node i den underliggende grafen er en separasjonsnode:
+</p>
+<ol class="org-ol">
+<li>Hvis rotnoden <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi><mo>∈</mo><mi>V</mi></mrow><annotation encoding="application/x-tex">r \in V</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.5782em; vertical-align: -0.0391em;"></span><span class="mord mathnormal" style="margin-right: 0.02778em;">r</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">∈</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.22222em;">V</span></span></span></span></span> i spenntreet har mer enn ett barn, så er roten
+<span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi></mrow><annotation encoding="application/x-tex">r</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.02778em;">r</span></span></span></span></span> i treet en separasjonsnode i <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>G</mi></mrow><annotation encoding="application/x-tex">G</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal">G</span></span></span></span></span>.</li>
+<li>Hvis <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>u</mi><mo>∈</mo><mi>V</mi></mrow><annotation encoding="application/x-tex">u \in V</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.5782em; vertical-align: -0.0391em;"></span><span class="mord mathnormal">u</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">∈</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.22222em;">V</span></span></span></span></span> ikke er en rotnoden og det <i>ikke</i> finnes en etterfølger <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>v</mi></mrow><annotation encoding="application/x-tex">v</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.03588em;">v</span></span></span></span></span> av
+<span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>u</mi></mrow><annotation encoding="application/x-tex">u</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal">u</span></span></span></span></span> (der <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>u</mi><mo mathvariant="normal">≠</mo><mi>v</mi></mrow><annotation encoding="application/x-tex">u \neq v</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.88888em; vertical-align: -0.19444em;"></span><span class="mord mathnormal">u</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel"><span class="mrel"><span class="mord vbox"><span class="thinbox"><span class="rlap"><span class="strut" style="height: 0.88888em; vertical-align: -0.19444em;"></span><span class="inner"><span class="mord"><span class="mrel"></span></span></span><span class="fix"></span></span></span></span></span><span class="mrel">=</span></span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.03588em;">v</span></span></span></span></span>) med en tilbakekant fra <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>v</mi></mrow><annotation encoding="application/x-tex">v</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.03588em;">v</span></span></span></span></span> til en forfeder av <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>u</mi></mrow><annotation encoding="application/x-tex">u</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal">u</span></span></span></span></span>, så
+er <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>u</mi></mrow><annotation encoding="application/x-tex">u</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal">u</span></span></span></span></span> en separasjonsnode i <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>G</mi></mrow><annotation encoding="application/x-tex">G</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal">G</span></span></span></span></span>.</li>
+</ol>
+
+<p>
+Det første punktet er ganske enkelt å avgjøre: vi kan for eksempel velge en
+vilkårlig node <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi></mrow><annotation encoding="application/x-tex">s</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal">s</span></span></span></span></span>, og starte søket fra en vilkårlig nabo av <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi></mrow><annotation encoding="application/x-tex">s</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal">s</span></span></span></span></span>. Dersom det
+finnes naboer av <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi></mrow><annotation encoding="application/x-tex">s</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal">s</span></span></span></span></span> som ikke er besøkt etter søket, så er roten en
+separasjonsnode.
+</p>
+
+<p>
+For å sjekke det andre punktet vil algoritmen for å finne separasjonsnoder
+holde styr på to tall for hver node <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>u</mi><mo>∈</mo><mi>V</mi></mrow><annotation encoding="application/x-tex">u \in V</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.5782em; vertical-align: -0.0391em;"></span><span class="mord mathnormal">u</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">∈</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.22222em;">V</span></span></span></span></span> som sammen lar oss identifisere
+alle separasjonsnoder i grafen. Det ene tallet <code>depth[u]</code> forteller oss hvor
+langt unna <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>u</mi></mrow><annotation encoding="application/x-tex">u</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal">u</span></span></span></span></span> er fra roten i spenntreet. Det andre tallet <code>low[u]</code> angir den
+laveste dybden som kan nås ved å følge én eller flere etterkommere av <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>u</mi></mrow><annotation encoding="application/x-tex">u</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal">u</span></span></span></span></span> og
+maksimalt en tilbakekant. Dersom <code>depth[u] &lt;= low[v]</code> der <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>u</mi></mrow><annotation encoding="application/x-tex">u</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal">u</span></span></span></span></span> er en node og
+<span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>v</mi></mrow><annotation encoding="application/x-tex">v</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.03588em;">v</span></span></span></span></span> er et barn av <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>u</mi></mrow><annotation encoding="application/x-tex">u</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal">u</span></span></span></span></span>, så er <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>u</mi></mrow><annotation encoding="application/x-tex">u</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal">u</span></span></span></span></span> en separasjonsnode.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python blur" style="cursor: pointer;"><button class="copy-code-button" type="button"><span class="copy-hoverbox">Copied!</span></button><span style="color: #673AB7;">def</span> <span style="color: #263238; font-weight: bold;">separationnodes_rec</span>(E, u, d, depth, low, parent, seps):
+    <span style="color: #263238; font-weight: bold;">depth</span>[u] = low[u] = d
+    <span style="color: #673AB7;">for</span> v <span style="color: #673AB7;">in</span> E[u]:
+        <span style="color: #673AB7;">if</span> v <span style="color: #673AB7;">in</span> parent <span style="color: #673AB7;">and</span> parent[v] == u:
+            <span style="color: #673AB7;">continue</span>
+        <span style="color: #673AB7;">if</span> v <span style="color: #673AB7;">in</span> depth:
+            <span style="color: #263238; font-weight: bold;">low</span>[u] = <span style="color: #673AB7;">min</span>(low[u], depth[v])
+            <span style="color: #673AB7;">continue</span>
+        <span style="color: #263238; font-weight: bold;">parent</span>[v] = u
+        separationnodes_rec(E, v, d + 1, depth, low, parent, seps)
+        <span style="color: #263238; font-weight: bold;">low</span>[u] = <span style="color: #673AB7;">min</span>(low[u], low[v])
+        <span style="color: #673AB7;">if</span> d &lt;= low[v]:
+            seps.add(u)
+
+<span style="color: #673AB7;">def</span> <span style="color: #263238; font-weight: bold;">separationnodes</span>(G):
+    <span style="color: #263238; font-weight: bold;">V</span>, <span style="color: #263238; font-weight: bold;">E</span>, <span style="color: #263238; font-weight: bold;">_</span> = G
+    <span style="color: #263238; font-weight: bold;">s</span> = <span style="color: #673AB7;">next</span>(<span style="color: #673AB7;">iter</span>(V))
+    <span style="color: #263238; font-weight: bold;">depth</span> = {s: 0}
+    <span style="color: #263238; font-weight: bold;">low</span> = {s: 0}
+    <span style="color: #263238; font-weight: bold;">parent</span> = {s: <span style="color: #673AB7;">None</span>}
+    <span style="color: #263238; font-weight: bold;">seps</span> = <span style="color: #673AB7;">set</span>()
+
+    <span style="color: #673AB7;">for</span> u <span style="color: #673AB7;">in</span> E[s]:
+        <span style="color: #673AB7;">if</span> u <span style="color: #673AB7;">not</span> <span style="color: #673AB7;">in</span> depth:
+            <span style="color: #263238; font-weight: bold;">parent</span>[u] = s
+            separationnodes_rec(E, u, 1, depth, low, parent, seps)
+
+    <span style="color: #673AB7;">if</span> <span style="color: #673AB7;">len</span>([u <span style="color: #673AB7;">for</span> u <span style="color: #673AB7;">in</span> E[s] <span style="color: #673AB7;">if</span> depth[u] == 1]) &gt; 1:
+        seps.add(s)
+
+    <span style="color: #673AB7;">return</span> seps
+</pre>
+</div>
+
+<p>
+Her splitter arbeidet opp i to prosedyrer. Det er to grunner til dette:
+</p>
+<ul class="org-ul">
+<li>Siden algoritmen er avhengig av flere datastrukturer (som vi
+tilgjengeliggjør som argumenter, til fordel for globale variabler), så kan
+vi initialisere disse i en egen prosedyre, og la den rekursive prosedyren,
+som står for mesteparten av «arbeidet», ta disse som argumenter.</li>
+<li>Rotnoden i spenntreet (altså startnoden i søket) behandles forskjellig fra
+andre noder. Ved å skille prosedyren i to, kan vi slippe å behandle
+spesialtilfeller for roten i den rekursive prosedyren, og heller ta høyde
+for disse i prosedyren som kalles.</li>
+</ul>
+
+<p>
+Vi kan kalle på prosedyren med <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>G</mi></mrow><annotation encoding="application/x-tex">G</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal">G</span></span></span></span></span> som argument. Siden <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>G</mi></mrow><annotation encoding="application/x-tex">G</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal">G</span></span></span></span></span> er
+2-sammenhengende bør vi heller ikke få noen separasjonsnoder.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python blur" style="cursor: pointer;"><button class="copy-code-button" type="button"><span class="copy-hoverbox">Copied!</span></button>separationnodes(G)
+</pre>
+</div>
+
+<pre class="example">set()
+</pre>
+
+
+<p>
+Det får vi heller ikke. Men hvis vi forsøker å fjerne noden <code>C</code>, hvilke
+noder blir da separasjonsnoder?
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python blur" style="cursor: pointer;"><button class="copy-code-button" type="button"><span class="copy-hoverbox">Copied!</span></button><span style="color: #673AB7;">sorted</span>(separationnodes(removenode(G, <span style="color: #90A4AE;">'C'</span>)))
+</pre>
+</div>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col class="org-left">
+
+<col class="org-left">
+
+<col class="org-left">
+
+<col class="org-left">
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">B</td>
+<td class="org-left">D</td>
+<td class="org-left">E</td>
+<td class="org-left">J</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+Med en algoritme for å finne separasjonsnoder i <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi mathvariant="normal">∣</mi><mi>V</mi><mi mathvariant="normal">∣</mi><mo>+</mo><mi mathvariant="normal">∣</mi><mi>E</mi><mi mathvariant="normal">∣</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(|V| + |E|)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathnormal" style="margin-right: 0.02778em;">O</span><span class="mopen">(</span><span class="mord">∣</span><span class="mord mathnormal" style="margin-right: 0.22222em;">V</span><span class="mord">∣</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord">∣</span><span class="mord mathnormal" style="margin-right: 0.05764em;">E</span><span class="mord">∣</span><span class="mclose">)</span></span></span></span></span> på plass er
+det enkelt å skrive en prosedyre som sjekker om en graf er
+2-sammenhengende med samme kjøretidskompleksitet.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python blur" style="cursor: pointer;"><button class="copy-code-button" type="button"><span class="copy-hoverbox">Copied!</span></button><span style="color: #673AB7;">def</span> <span style="color: #263238; font-weight: bold;">isbiconnected</span>(G):
+    <span style="color: #673AB7;">return</span> <span style="color: #673AB7;">len</span>(separationnodes(G)) == 0
+</pre>
+</div>
+
+<p>
+Denne kan kalles på samme måte som <code>isbiconnected_naive</code>, men har betydelig
+mye bedre kjøretidskompleksitet.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python blur" style="cursor: pointer;"><button class="copy-code-button" type="button"><span class="copy-hoverbox">Copied!</span></button>isbiconnected(G)
+</pre>
+</div>
+
+<pre class="example">True
+</pre>
+
+
+<div class="org-src-container">
+<pre class="src src-python blur" style="cursor: pointer;"><button class="copy-code-button" type="button"><span class="copy-hoverbox">Copied!</span></button>isbiconnected(removenode(G, <span style="color: #90A4AE;">'C'</span>))
+</pre>
+</div>
+
+<pre class="example">False
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org2875349" class="outline-2">
+<h2 id="org2875349">Sterkt sammenhengende komponenter</h2>
+<div class="outline-text-2" id="text-org2875349">
+
+<div id="org13bee03" class="figure">
+<p><img src="./Utvalgte grafalgoritmer_files/forelesningsgraf2.svg" alt="forelesningsgraf2.svg" class="org-svg" width="400">
+</p>
+</div>
+
+<p>
+For å snakke om sterkt sammenhengende komponenter må vi gjøre det i
+konteksten av <i>rettede</i> grafer. I en sterkt sammenhengende komponent må alle
+noder ha en sti til alle andre noder i samme sterkt sammenhengende komponent.
+I tillegg må en sterkt sammenhengende komponent være <i>maksimal</i>, altså
+snakker vi om den største mulige sterkt sammenhengende komponenten.
+</p>
+
+<p>
+En viktig innsikt er at de sterkt sammenhengende komponentene av en graf <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>G</mi></mrow><annotation encoding="application/x-tex">G</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal">G</span></span></span></span></span>
+består av de samme nodene som i den <i>reverserte</i> grafen <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>G</mi><mi>r</mi></msub></mrow><annotation encoding="application/x-tex">G_r</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.83333em; vertical-align: -0.15em;"></span><span class="mord"><span class="mord mathnormal">G</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height: 0.151392em;"><span class="" style="top: -2.55em; margin-left: 0em; margin-right: 0.05em;"><span class="pstrut" style="height: 2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right: 0.02778em;">r</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height: 0.15em;"><span class=""></span></span></span></span></span></span></span></span></span></span>. Den reverserte
+grafen består av de samme nodene, men der alle kanter er snudd. Altså for
+hver kant <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mi>u</mi><mo separator="true">,</mo><mi>v</mi><mo stretchy="false">)</mo><mo>∈</mo><mi>E</mi></mrow><annotation encoding="application/x-tex">(u, v) \in E</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord mathnormal">u</span><span class="mpunct">,</span><span class="mspace" style="margin-right: 0.166667em;"></span><span class="mord mathnormal" style="margin-right: 0.03588em;">v</span><span class="mclose">)</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">∈</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.05764em;">E</span></span></span></span></span> erstattes med kanten <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mi>v</mi><mo separator="true">,</mo><mi>u</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(v, u)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right: 0.03588em;">v</span><span class="mpunct">,</span><span class="mspace" style="margin-right: 0.166667em;"></span><span class="mord mathnormal">u</span><span class="mclose">)</span></span></span></span></span>.
+</p>
+
+<p>
+Grafen vi ser på bildet ovenfor er en rettet graf som består av tre sterkt
+sammenhengende komponenter. Grafen kan skrives ned slik:
+</p>
+
+<pre class="example" id="org3cc8c0c">A B
+B C
+B E
+B F
+C D
+C G
+D C
+D H
+E A
+E F
+F G
+G F
+H D
+H G
+</pre>
+
+<p>
+La oss nå bygge denne grafen, men her ta høyde for at vi jobber med en graf
+som er rettet og uvektet.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python blur" style="cursor: pointer;"><button class="copy-code-button" type="button"><span class="copy-hoverbox">Copied!</span></button><span style="color: #673AB7;">def</span> <span style="color: #263238; font-weight: bold;">builddigraph</span>(lines):
+    <span style="color: #263238; font-weight: bold;">V</span> = <span style="color: #673AB7;">set</span>()
+    <span style="color: #263238; font-weight: bold;">E</span> = defaultdict(<span style="color: #673AB7;">set</span>)
+
+    <span style="color: #673AB7;">for</span> line <span style="color: #673AB7;">in</span> lines.splitlines():
+        <span style="color: #263238; font-weight: bold;">v</span>, <span style="color: #263238; font-weight: bold;">u</span> = line.strip().split()
+        V.add(v)
+        V.add(u)
+        E[v].add(u)
+
+    <span style="color: #673AB7;">return</span> V, E
+</pre>
+</div>
+
+<p>
+La oss nå erstatte <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>G</mi></mrow><annotation encoding="application/x-tex">G</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal">G</span></span></span></span></span> med denne nye grafen. Igjen antar vi at beskrivelsen
+ovenfor er gitt i en variabel <code>lines</code>.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python blur" style="cursor: pointer;"><button class="copy-code-button" type="button"><span class="copy-hoverbox">Copied!</span></button><span style="color: #263238; font-weight: bold;">G</span> = builddigraph(lines)
+</pre>
+</div>
+
+<p>
+Og la oss tegne denne nye grafen, i likhet med den forrige.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python blur" style="cursor: pointer;"><button class="copy-code-button" type="button"><span class="copy-hoverbox">Copied!</span></button><span style="color: #673AB7;">def</span> <span style="color: #263238; font-weight: bold;">drawdigraph</span>(G, name):
+     <span style="color: #263238; font-weight: bold;">V</span>, <span style="color: #263238; font-weight: bold;">E</span> = G
+     <span style="color: #263238; font-weight: bold;">dot</span> = graphviz.Digraph()
+
+     <span style="color: #673AB7;">for</span> u <span style="color: #673AB7;">in</span> V:
+          dot.node(u)
+
+          <span style="color: #673AB7;">for</span> v <span style="color: #673AB7;">in</span> E[u]:
+               dot.edge(u, v)
+
+     dot.render(name, <span style="color: #673AB7;">format</span>=<span style="color: #90A4AE;">'svg'</span>)
+
+drawdigraph(G, <span style="color: #90A4AE;">'digraph'</span>)
+</pre>
+</div>
+
+
+<div id="orge463402" class="figure">
+<p><img src="./Utvalgte grafalgoritmer_files/digraph.svg" alt="digraph.svg" class="org-svg">
+</p>
+</div>
+
+<p>
+Vi kommer til å få bruk for den reverserte grafen, så la oss skrive en
+hjelpeprosedyre for dette.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python blur" style="cursor: pointer;"><button class="copy-code-button" type="button"><span class="copy-hoverbox">Copied!</span></button><span style="color: #673AB7;">def</span> <span style="color: #263238; font-weight: bold;">reversegraph</span>(G):
+    <span style="color: #263238; font-weight: bold;">V</span>, <span style="color: #263238; font-weight: bold;">E</span> = G
+    <span style="color: #263238; font-weight: bold;">rE</span> = defaultdict(<span style="color: #673AB7;">set</span>)
+
+    <span style="color: #673AB7;">for</span> u <span style="color: #673AB7;">in</span> V:
+        <span style="color: #673AB7;">for</span> v <span style="color: #673AB7;">in</span> E[u]:
+            rE[v].add(u)
+    <span style="color: #673AB7;">return</span> V, rE
+</pre>
+</div>
+
+<p>
+La oss sjekke om resultatet ser rimelig ut ved å tegne den.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python blur" style="cursor: pointer;"><button class="copy-code-button" type="button"><span class="copy-hoverbox">Copied!</span></button>drawdigraph(reversegraph(G), <span style="color: #90A4AE;">'digraph_r'</span>)
+</pre>
+</div>
+
+
+<div id="org9a9cc65" class="figure">
+<p><img src="./Utvalgte grafalgoritmer_files/digraph_r.svg" alt="digraph_r.svg" class="org-svg">
+</p>
+</div>
+
+<p>
+Det er lurt å sjekke de to grafene, og forsikre seg selv om at de sterkt
+sammenhengende komponentene er de samme.
+</p>
+</div>
+
+<div id="outline-container-org963856e" class="outline-3">
+<h3 id="org963856e">DFS og topologisk sortering</h3>
+<div class="outline-text-3" id="text-org963856e">
+<p>
+Vi har allerede sett en algoritme for topologisk sortering. Men nå som vi er
+nærmere kjent med dybde-først søk skal vi se at vi kan topologisk sortere
+noder kun ved hjelp av et dybde-først søk. Det er overraskende enkelt: gjør
+et dybde-først søk, der en node legges på en stack etter alle naboer er
+besøkt. Til slutt, vil den stacken være en topologisk sortering for grafen.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python blur" style="cursor: pointer;"><button class="copy-code-button" type="button"><span class="copy-hoverbox">Copied!</span></button><span style="color: #673AB7;">def</span> <span style="color: #263238; font-weight: bold;">dfsvisit</span>(G, u, visited, stack):
+    <span style="color: #263238; font-weight: bold;">V</span>, <span style="color: #263238; font-weight: bold;">E</span> = G
+    visited.add(u)
+    <span style="color: #673AB7;">for</span> v <span style="color: #673AB7;">in</span> E[u]:
+        <span style="color: #673AB7;">if</span> v <span style="color: #673AB7;">not</span> <span style="color: #673AB7;">in</span> visited:
+            dfsvisit(G, v, visited, stack)
+    stack.append(u)
+
+<span style="color: #673AB7;">def</span> <span style="color: #263238; font-weight: bold;">dfstopsort</span>(G):
+    <span style="color: #263238; font-weight: bold;">V</span>, <span style="color: #263238; font-weight: bold;">E</span> = G
+    <span style="color: #263238; font-weight: bold;">visited</span> = <span style="color: #673AB7;">set</span>()
+    <span style="color: #263238; font-weight: bold;">stack</span> = []
+    <span style="color: #673AB7;">for</span> u <span style="color: #673AB7;">in</span> V:
+        <span style="color: #673AB7;">if</span> u <span style="color: #673AB7;">not</span> <span style="color: #673AB7;">in</span> visited:
+            dfsvisit(G, u, visited, stack)
+    <span style="color: #673AB7;">return</span> stack
+</pre>
+</div>
+
+<p>
+Husk at topologisk sortering kun fungerer på asykliske grafer. Vi har ikke
+en slik for hånden, så vi etterlater å teste denne prosedyren som en oppgave
+til leseren.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org98681f9" class="outline-3">
+<h3 id="org98681f9">Kosarajus algoritme</h3>
+<div class="outline-text-3" id="text-org98681f9">
+<p>
+Algoritmen vi skal se på for sterkt sammenhengende komponenter er utrolig
+elegant, og bygger et par viktige innsikter. Den første har vi allerede
+etablert: de sterkt sammenhengende komponentene til en graf <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>G</mi></mrow><annotation encoding="application/x-tex">G</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal">G</span></span></span></span></span> er de samme
+som de sterkt sammenhengende komponentene til den reverserte grafen <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>G</mi><mi>r</mi></msub></mrow><annotation encoding="application/x-tex">G_r</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.83333em; vertical-align: -0.15em;"></span><span class="mord"><span class="mord mathnormal">G</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height: 0.151392em;"><span class="" style="top: -2.55em; margin-left: 0em; margin-right: 0.05em;"><span class="pstrut" style="height: 2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right: 0.02778em;">r</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height: 0.15em;"><span class=""></span></span></span></span></span></span></span></span></span></span>.
+Intuitivt kan vi tenke på en sterkt sammenhengende komponent som en sykel.
+</p>
+
+<p>
+En annen innsikt er at hvis vi ønsker å finne den sterkt sammenhengende
+komponenten for en node <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>v</mi><mo>∈</mo><mi>V</mi></mrow><annotation encoding="application/x-tex">v \in V</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.5782em; vertical-align: -0.0391em;"></span><span class="mord mathnormal" style="margin-right: 0.03588em;">v</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">∈</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.22222em;">V</span></span></span></span></span>, så er det tilstrekkelig å finne nodene
+som kan nås fra <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>v</mi></mrow><annotation encoding="application/x-tex">v</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.03588em;">v</span></span></span></span></span> i <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>G</mi></mrow><annotation encoding="application/x-tex">G</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal">G</span></span></span></span></span> (for eksempel ved et dybde-først søk), og finne
+nodene som kan nås fra <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>v</mi></mrow><annotation encoding="application/x-tex">v</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.03588em;">v</span></span></span></span></span> i den reverserte grafen <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>G</mi><mi>r</mi></msub></mrow><annotation encoding="application/x-tex">G_r</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.83333em; vertical-align: -0.15em;"></span><span class="mord"><span class="mord mathnormal">G</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height: 0.151392em;"><span class="" style="top: -2.55em; margin-left: 0em; margin-right: 0.05em;"><span class="pstrut" style="height: 2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right: 0.02778em;">r</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height: 0.15em;"><span class=""></span></span></span></span></span></span></span></span></span></span>. Nodene som kan nås
+fra <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>v</mi></mrow><annotation encoding="application/x-tex">v</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.03588em;">v</span></span></span></span></span> i både <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>G</mi></mrow><annotation encoding="application/x-tex">G</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal">G</span></span></span></span></span> og <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>G</mi><mi>r</mi></msub></mrow><annotation encoding="application/x-tex">G_r</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.83333em; vertical-align: -0.15em;"></span><span class="mord"><span class="mord mathnormal">G</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height: 0.151392em;"><span class="" style="top: -2.55em; margin-left: 0em; margin-right: 0.05em;"><span class="pstrut" style="height: 2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right: 0.02778em;">r</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height: 0.15em;"><span class=""></span></span></span></span></span></span></span></span></span></span> utgjør den sterkt sammenhengende komponenten til
+<span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>v</mi></mrow><annotation encoding="application/x-tex">v</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.03588em;">v</span></span></span></span></span>. Vi kunne gjort dette for hver node <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>v</mi><mo>∈</mo><mi>V</mi></mrow><annotation encoding="application/x-tex">v \in V</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.5782em; vertical-align: -0.0391em;"></span><span class="mord mathnormal" style="margin-right: 0.03588em;">v</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">∈</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.22222em;">V</span></span></span></span></span>, og funnet de sterkt
+sammenhengende komponentene i <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi mathvariant="normal">∣</mi><mi>V</mi><mi mathvariant="normal">∣</mi><mo>⋅</mo><mo stretchy="false">(</mo><mi mathvariant="normal">∣</mi><mi>V</mi><mi mathvariant="normal">∣</mi><mo>+</mo><mi mathvariant="normal">∣</mi><mi>E</mi><mi mathvariant="normal">∣</mi><mo stretchy="false">)</mo><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(|V|\cdot(|V| + |E|))</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathnormal" style="margin-right: 0.02778em;">O</span><span class="mopen">(</span><span class="mord">∣</span><span class="mord mathnormal" style="margin-right: 0.22222em;">V</span><span class="mord">∣</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">∣</span><span class="mord mathnormal" style="margin-right: 0.22222em;">V</span><span class="mord">∣</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord">∣</span><span class="mord mathnormal" style="margin-right: 0.05764em;">E</span><span class="mord">∣</span><span class="mclose">))</span></span></span></span></span>, men igjen vil vi
+finne en mer effektiv algoritme.
+</p>
+
+<p>
+Hvis vi anser hver sterkt sammenhengende komponent som en enkelt node (altså
+at vi anser det røde, grønne og lilla områdene i grafen ovenfor som noder),
+så får vi det vi kaller <i>komponentgrafen</i>. Denne grafen er garantert å ikke
+inneholde noen sykel, altså er komponentgrafen garantert å være asyklisk.
+Dersom to komponenter var en del av samme sykel, så kunne alle nodene i de
+to komponentene hatt en sti til hverandre; dette er en motsigelse, fordi
+hvis alle nodene fra to komponenter kan nå hverandre, så er de også nødt til
+å være i samme sterkt sammenhengende komponent.
+</p>
+
+<p>
+La oss anta at vi har den underliggende komponentgrafen. Merk at dette
+faller på sin egen urimelighet, fordi det er jo den vi ønsker å finne, men
+gå med på antagelsen inntil videre. Hvis vi gjør en <i>topologisk sortering</i>
+av komponentgrafen, så vet vi at den topologisk siste komponenten umulig kan
+ha en kant til noen andre komponenter. Den topologisk nest siste komponenten
+kan umulig ha en kant til andre komponenter enn den topologisk siste grafen,
+og så videre. Dette er den siste innsikten vi trenger for Kosaraju sin
+algoritme for sterkt sammenhengende komponenter.
+</p>
+
+<p>
+Algoritmen kan i korte trekk beskrives slik:
+</p>
+<ol class="org-ol">
+<li>Gjør et (fullt) dybde-først søk i en graf <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>G</mi></mrow><annotation encoding="application/x-tex">G</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal">G</span></span></span></span></span>, der hver node legges på en
+stack etter alle naboer er besøkt (akkurat slik som <code>dfstopsort</code>).</li>
+<li>Konstruer den reverserte grafen <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>G</mi><mi>r</mi></msub></mrow><annotation encoding="application/x-tex">G_r</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.83333em; vertical-align: -0.15em;"></span><span class="mord"><span class="mord mathnormal">G</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height: 0.151392em;"><span class="" style="top: -2.55em; margin-left: 0em; margin-right: 0.05em;"><span class="pstrut" style="height: 2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right: 0.02778em;">r</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height: 0.15em;"><span class=""></span></span></span></span></span></span></span></span></span></span></li>
+<li>Gjør et nytt (fullt) dybde-først søk på <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>G</mi><mi>r</mi></msub></mrow><annotation encoding="application/x-tex">G_r</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.83333em; vertical-align: -0.15em;"></span><span class="mord"><span class="mord mathnormal">G</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height: 0.151392em;"><span class="" style="top: -2.55em; margin-left: 0em; margin-right: 0.05em;"><span class="pstrut" style="height: 2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right: 0.02778em;">r</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height: 0.15em;"><span class=""></span></span></span></span></span></span></span></span></span></span>, der det rekkefølgen i det
+fulle dybde-først søket er diktert av stacken fra det første søket.</li>
+</ol>
+
+<p>
+I kode kan det uttrykkes slik (der vi benytter oss av <code>dfstopsort</code> og
+<code>dfsvisit</code>):
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python blur" style="cursor: pointer;"><button class="copy-code-button" type="button"><span class="copy-hoverbox">Copied!</span></button><span style="color: #673AB7;">def</span> <span style="color: #263238; font-weight: bold;">stronglyconnectedcomponents</span>(G):
+    <span style="color: #263238; font-weight: bold;">V</span>, <span style="color: #263238; font-weight: bold;">E</span> = G
+
+    <span style="color: #263238; font-weight: bold;">stack</span> = dfstopsort(G)
+
+    <span style="color: #263238; font-weight: bold;">Gr</span> = reversegraph(G)
+    <span style="color: #263238; font-weight: bold;">visited</span> = <span style="color: #673AB7;">set</span>()
+    <span style="color: #263238; font-weight: bold;">components</span> = []
+    <span style="color: #673AB7;">while</span> stack:
+        <span style="color: #263238; font-weight: bold;">u</span> = stack.pop()
+        <span style="color: #673AB7;">if</span> u <span style="color: #673AB7;">not</span> <span style="color: #673AB7;">in</span> visited:
+            <span style="color: #263238; font-weight: bold;">component</span> = []
+            dfsvisit(Gr, u, visited, component)
+            components.append(component)
+
+    <span style="color: #673AB7;">return</span> components
+</pre>
+</div>
+
+<p>
+Det er viktig å presisere at <code>dfstopsort</code> ikke faktisk gjør en topologisk
+sortering av <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>G</mi></mrow><annotation encoding="application/x-tex">G</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal">G</span></span></span></span></span>. Siden <span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>G</mi></mrow><annotation encoding="application/x-tex">G</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal">G</span></span></span></span></span> inneholder sykler så har den heller ingen
+topologisk sortering. Det vi får er en topologisk sortering av den
+underliggende <i>komponentgrafen</i>. For hver node vi kaller <code>dfsvisit</code> på i den
+reverserte grafen, så vil vi alle nodene i den resulterende komponenten
+legges til i <code>visited</code> og ikke bli besøkt igjen. Den neste noden som besøkes
+vil tilhøre en topologisk tidligere komponent.
+</p>
+
+<p>
+Det siste som gjenstår er å sjekke at prosedyren fungerer på eksempel
+grafen.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python blur" style="cursor: pointer;"><button class="copy-code-button" type="button"><span class="copy-hoverbox">Copied!</span></button>stronglyconnectedcomponents(G)
+</pre>
+</div>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col class="org-left">
+
+<col class="org-left">
+
+<col class="org-left">
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">A</td>
+<td class="org-left">B</td>
+<td class="org-left">E</td>
+</tr>
+
+<tr>
+<td class="org-left">H</td>
+<td class="org-left">D</td>
+<td class="org-left">C</td>
+</tr>
+
+<tr>
+<td class="org-left">G</td>
+<td class="org-left">F</td>
+<td class="org-left">&nbsp;</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div id="footnotes">
+<h2 class="footnotes">Fotnoter: </h2>
+<div id="text-footnotes">
+
+<div class="footdef"><sup><a id="fn.1" class="footnum" href="https://larstvei.github.io/grafalgoritmer/#fnr.1" role="doc-backlink">1</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">Dette kan gjøres på logaritmisk tid, men
+krever at man bruker <i>Locators</i> (som er beskrevet i seksjon 5.5 i Goodrich &amp;
+Tamassia), eller noe lignende.</p></div></div>
+
+<div class="footdef"><sup><a id="fn.2" class="footnum" href="https://larstvei.github.io/grafalgoritmer/#fnr.2" role="doc-backlink">2</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">Det kan være så mange som
+<span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mfrac><mrow><mi mathvariant="normal">∣</mi><mi>V</mi><mi mathvariant="normal">∣</mi><mo stretchy="false">(</mo><mi mathvariant="normal">∣</mi><mi>V</mi><mi mathvariant="normal">∣</mi><mo>−</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><mn>2</mn></mfrac></mrow><annotation encoding="application/x-tex">\frac{|V|(|V| - 1)}{2}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1.355em; vertical-align: -0.345em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height: 1.01em;"><span class="" style="top: -2.655em;"><span class="pstrut" style="height: 3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">2</span></span></span></span><span class="" style="top: -3.23em;"><span class="pstrut" style="height: 3em;"></span><span class="frac-line" style="border-bottom-width: 0.04em;"></span></span><span class="" style="top: -3.485em;"><span class="pstrut" style="height: 3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">∣</span><span class="mord mathnormal mtight" style="margin-right: 0.22222em;">V</span><span class="mord mtight">∣</span><span class="mopen mtight">(</span><span class="mord mtight">∣</span><span class="mord mathnormal mtight" style="margin-right: 0.22222em;">V</span><span class="mord mtight">∣</span><span class="mbin mtight">−</span><span class="mord mtight">1</span><span class="mclose mtight">)</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height: 0.345em;"><span class=""></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span></span> kanter i en urettet graf.</p></div></div>
+
+
+</div>
+</div></div>
+
+</body></html>

@@ -1,0 +1,142 @@
+graph {
+	"Toby Jones"
+	"Toby Jones" -- "Scarlett Johansson" [label="('Captain America: The Winter Soldier', '7.8')"]
+	"Toby Jones" -- "Toby Jones" [label="('Captain America: The Winter Soldier', '7.8')"]
+	"Toby Jones" -- "Anthony Mackie" [label="('Captain America: The Winter Soldier', '7.8')"]
+	"Toby Jones" -- "Samuel L. Jackson" [label="('Captain America: The Winter Soldier', '7.8')"]
+	"Toby Jones" -- "Robert Redford" [label="('Captain America: The Winter Soldier', '7.8')"]
+	"Toby Jones" -- "Thomas Kretschmann" [label="('Captain America: The Winter Soldier', '7.8')"]
+	"Scarlett Johansson"
+	"Scarlett Johansson" -- "Scarlett Johansson" [label="('Avengers: Infinity War', '8.4')"]
+	"Scarlett Johansson" -- "Anthony Mackie" [label="('Avengers: Infinity War', '8.4')"]
+	"Scarlett Johansson" -- "William Hurt" [label="('Avengers: Infinity War', '8.4')"]
+	"Scarlett Johansson" -- "Mark Ruffalo" [label="('Avengers: Infinity War', '8.4')"]
+	"Scarlett Johansson" -- "Thomas Kretschmann" [label="('Captain America: The Winter Soldier', '7.8')"]
+	"Scarlett Johansson" -- "Harry Dean Stanton" [label="('The Avengers', '8.0')"]
+	"Scarlett Johansson" -- "Samuel L. Jackson" [label="('Avengers: Infinity War', '8.4')"]
+	"Scarlett Johansson" -- "Josh Brolin" [label="('Avengers: Infinity War', '8.4')"]
+	"Scarlett Johansson" -- "Robert Downey Jr." [label="('Avengers: Infinity War', '8.4')"]
+	"Scarlett Johansson" -- "Robert Redford" [label="('Captain America: The Winter Soldier', '7.8')"]
+	"Scarlett Johansson" -- "Stellan Skarsgård" [label="('The Avengers', '8.0')"]
+	"William Hurt"
+	"William Hurt" -- "Anthony Mackie" [label="('Avengers: Infinity War', '8.4')"]
+	"William Hurt" -- "William Hurt" [label="('Avengers: Infinity War', '8.4')"]
+	"William Hurt" -- "Mark Ruffalo" [label="('Avengers: Infinity War', '8.4')"]
+	"William Hurt" -- "Samuel L. Jackson" [label="('Avengers: Infinity War', '8.4')"]
+	"William Hurt" -- "Josh Brolin" [label="('Avengers: Infinity War', '8.4')"]
+	"William Hurt" -- "Robert Downey Jr." [label="('Avengers: Infinity War', '8.4')"]
+	"Sam Neill"
+	"Sam Neill" -- "Mark Ruffalo" [label="('Thor: Ragnarok', '7.9')"]
+	"Sam Neill" -- "Tadanobu Asano" [label="('Thor: Ragnarok', '7.9')"]
+	"Sam Neill" -- "Sam Neill" [label="('Thor: Ragnarok', '7.9')"]
+	"Sam Neill" -- "Anthony Hopkins" [label="('Thor: Ragnarok', '7.9')"]
+	"Sam Neill" -- "Cate Blanchett" [label="('Thor: Ragnarok', '7.9')"]
+	"Sam Neill" -- "Matt Damon" [label="('Thor: Ragnarok', '7.9')"]
+	"Sam Neill" -- "Jeff Goldblum" [label="('Thor: Ragnarok', '7.9')"]
+	"Forest Whitaker"
+	"Forest Whitaker" -- "Forest Whitaker" [label="('Black Panther', '7.3')"]
+	"Lloyd Kaufman"
+	"Lloyd Kaufman" -- "Josh Brolin" [label="('Guardians of the Galaxy', '8.0')"]
+	"Lloyd Kaufman" -- "John C. Reilly" [label="('Guardians of the Galaxy', '8.0')"]
+	"Lloyd Kaufman" -- "Michael Rooker" [label="('Guardians of the Galaxy', '8.0')"]
+	"Lloyd Kaufman" -- "Lloyd Kaufman" [label="('Guardians of the Galaxy', '8.0')"]
+	"Robert Downey Jr."
+	"Robert Downey Jr." -- "Terrence Howard" [label="('Iron Man', '7.9')"]
+	"Robert Downey Jr." -- "Anthony Mackie" [label="('Avengers: Infinity War', '8.4')"]
+	"Robert Downey Jr." -- "Mark Ruffalo" [label="('Avengers: Infinity War', '8.4')"]
+	"Robert Downey Jr." -- "Harry Dean Stanton" [label="('The Avengers', '8.0')"]
+	"Robert Downey Jr." -- "Samuel L. Jackson" [label="('Avengers: Infinity War', '8.4')"]
+	"Robert Downey Jr." -- "Jeff Bridges" [label="('Iron Man', '7.9')"]
+	"Robert Downey Jr." -- "Josh Brolin" [label="('Avengers: Infinity War', '8.4')"]
+	"Robert Downey Jr." -- "Robert Downey Jr." [label="('Avengers: Infinity War', '8.4')"]
+	"Robert Downey Jr." -- "Stellan Skarsgård" [label="('The Avengers', '8.0')"]
+	"Michael Peña"
+	"Michael Peña" -- "Anthony Mackie" [label="('Ant-Man', '7.3')"]
+	"Michael Peña" -- "Michael Douglas" [label="('Ant-Man', '7.3')"]
+	"Michael Peña" -- "Judy Greer" [label="('Ant-Man', '7.3')"]
+	"Michael Peña" -- "Paul Rudd" [label="('Ant-Man', '7.3')"]
+	"Michael Peña" -- "Michael Peña" [label="('Ant-Man', '7.3')"]
+	"Stellan Skarsgård"
+	"Stellan Skarsgård" -- "Mark Ruffalo" [label="('The Avengers', '8.0')"]
+	"Stellan Skarsgård" -- "Harry Dean Stanton" [label="('The Avengers', '8.0')"]
+	"Stellan Skarsgård" -- "Samuel L. Jackson" [label="('The Avengers', '8.0')"]
+	"Stellan Skarsgård" -- "Stellan Skarsgård" [label="('The Avengers', '8.0')"]
+	"Anthony Mackie"
+	"Anthony Mackie" -- "Anthony Mackie" [label="('Avengers: Infinity War', '8.4')"]
+	"Anthony Mackie" -- "Michael Douglas" [label="('Ant-Man', '7.3')"]
+	"Anthony Mackie" -- "Mark Ruffalo" [label="('Avengers: Infinity War', '8.4')"]
+	"Anthony Mackie" -- "Judy Greer" [label="('Ant-Man', '7.3')"]
+	"Anthony Mackie" -- "Samuel L. Jackson" [label="('Avengers: Infinity War', '8.4')"]
+	"Anthony Mackie" -- "Josh Brolin" [label="('Avengers: Infinity War', '8.4')"]
+	"Anthony Mackie" -- "Paul Rudd" [label="('Ant-Man', '7.3')"]
+	"Anthony Mackie" -- "Robert Redford" [label="('Captain America: The Winter Soldier', '7.8')"]
+	"Anthony Mackie" -- "Thomas Kretschmann" [label="('Captain America: The Winter Soldier', '7.8')"]
+	"Michael Douglas"
+	"Michael Douglas" -- "Michael Douglas" [label="('Ant-Man', '7.3')"]
+	"Michael Douglas" -- "Judy Greer" [label="('Ant-Man', '7.3')"]
+	"Michael Douglas" -- "Paul Rudd" [label="('Ant-Man', '7.3')"]
+	"Judy Greer"
+	"Judy Greer" -- "Judy Greer" [label="('Ant-Man', '7.3')"]
+	"Judy Greer" -- "Paul Rudd" [label="('Ant-Man', '7.3')"]
+	"John C. Reilly"
+	"John C. Reilly" -- "Josh Brolin" [label="('Guardians of the Galaxy', '8.0')"]
+	"John C. Reilly" -- "John C. Reilly" [label="('Guardians of the Galaxy', '8.0')"]
+	"John C. Reilly" -- "Michael Rooker" [label="('Guardians of the Galaxy', '8.0')"]
+	"Matt Damon"
+	"Matt Damon" -- "Mark Ruffalo" [label="('Thor: Ragnarok', '7.9')"]
+	"Matt Damon" -- "Tadanobu Asano" [label="('Thor: Ragnarok', '7.9')"]
+	"Matt Damon" -- "Anthony Hopkins" [label="('Thor: Ragnarok', '7.9')"]
+	"Matt Damon" -- "Cate Blanchett" [label="('Thor: Ragnarok', '7.9')"]
+	"Matt Damon" -- "Matt Damon" [label="('Thor: Ragnarok', '7.9')"]
+	"Matt Damon" -- "Jeff Goldblum" [label="('Thor: Ragnarok', '7.9')"]
+	"Jeff Goldblum"
+	"Jeff Goldblum" -- "Mark Ruffalo" [label="('Thor: Ragnarok', '7.9')"]
+	"Jeff Goldblum" -- "Tadanobu Asano" [label="('Thor: Ragnarok', '7.9')"]
+	"Jeff Goldblum" -- "Anthony Hopkins" [label="('Thor: Ragnarok', '7.9')"]
+	"Jeff Goldblum" -- "Cate Blanchett" [label="('Thor: Ragnarok', '7.9')"]
+	"Jeff Goldblum" -- "Jeff Goldblum" [label="('Thor: Ragnarok', '7.9')"]
+	"Tadanobu Asano"
+	"Tadanobu Asano" -- "Mark Ruffalo" [label="('Thor: Ragnarok', '7.9')"]
+	"Tadanobu Asano" -- "Tadanobu Asano" [label="('Thor: Ragnarok', '7.9')"]
+	"Tadanobu Asano" -- "Anthony Hopkins" [label="('Thor: Ragnarok', '7.9')"]
+	"Tadanobu Asano" -- "Cate Blanchett" [label="('Thor: Ragnarok', '7.9')"]
+	"Terrence Howard"
+	"Terrence Howard" -- "Terrence Howard" [label="('Iron Man', '7.9')"]
+	"Terrence Howard" -- "Jeff Bridges" [label="('Iron Man', '7.9')"]
+	"Terrence Howard" -- "Samuel L. Jackson" [label="('Iron Man', '7.9')"]
+	"Mark Ruffalo"
+	"Mark Ruffalo" -- "Mark Ruffalo" [label="('Avengers: Infinity War', '8.4')"]
+	"Mark Ruffalo" -- "Harry Dean Stanton" [label="('The Avengers', '8.0')"]
+	"Mark Ruffalo" -- "Samuel L. Jackson" [label="('Avengers: Infinity War', '8.4')"]
+	"Mark Ruffalo" -- "Anthony Hopkins" [label="('Thor: Ragnarok', '7.9')"]
+	"Mark Ruffalo" -- "Cate Blanchett" [label="('Thor: Ragnarok', '7.9')"]
+	"Mark Ruffalo" -- "Josh Brolin" [label="('Avengers: Infinity War', '8.4')"]
+	"Michael Rooker"
+	"Michael Rooker" -- "Josh Brolin" [label="('Guardians of the Galaxy', '8.0')"]
+	"Michael Rooker" -- "Michael Rooker" [label="('Guardians of the Galaxy', '8.0')"]
+	"Harry Dean Stanton"
+	"Harry Dean Stanton" -- "Harry Dean Stanton" [label="('The Avengers', '8.0')"]
+	"Harry Dean Stanton" -- "Samuel L. Jackson" [label="('The Avengers', '8.0')"]
+	"Samuel L. Jackson"
+	"Samuel L. Jackson" -- "Thomas Kretschmann" [label="('Captain America: The Winter Soldier', '7.8')"]
+	"Samuel L. Jackson" -- "Samuel L. Jackson" [label="('Avengers: Infinity War', '8.4')"]
+	"Samuel L. Jackson" -- "Jeff Bridges" [label="('Iron Man', '7.9')"]
+	"Samuel L. Jackson" -- "Josh Brolin" [label="('Avengers: Infinity War', '8.4')"]
+	"Samuel L. Jackson" -- "Robert Redford" [label="('Captain America: The Winter Soldier', '7.8')"]
+	"Anthony Hopkins"
+	"Anthony Hopkins" -- "Anthony Hopkins" [label="('Thor: Ragnarok', '7.9')"]
+	"Anthony Hopkins" -- "Cate Blanchett" [label="('Thor: Ragnarok', '7.9')"]
+	"Cate Blanchett"
+	"Cate Blanchett" -- "Cate Blanchett" [label="('Thor: Ragnarok', '7.9')"]
+	"Jeff Bridges"
+	"Jeff Bridges" -- "Jeff Bridges" [label="('Iron Man', '7.9')"]
+	"Josh Brolin"
+	"Josh Brolin" -- "Josh Brolin" [label="('Avengers: Infinity War', '8.4')"]
+	"Paul Rudd"
+	"Paul Rudd" -- "Paul Rudd" [label="('Ant-Man', '7.3')"]
+	"Robert Redford"
+	"Robert Redford" -- "Robert Redford" [label="('Captain America: The Winter Soldier', '7.8')"]
+	"Robert Redford" -- "Thomas Kretschmann" [label="('Captain America: The Winter Soldier', '7.8')"]
+	"Thomas Kretschmann"
+	"Thomas Kretschmann" -- "Thomas Kretschmann" [label="('Captain America: The Winter Soldier', '7.8')"]
+}
